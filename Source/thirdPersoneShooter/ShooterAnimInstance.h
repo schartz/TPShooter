@@ -37,6 +37,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
 	float LastMovementOffsetYaw;
 
+	// true if our character is aiming
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess = "true"))
+	bool bAiming;
+
 public:
 
 	// this function is like beginPlay but for animations

@@ -100,8 +100,9 @@ private:
 
 
 public:
-	FORCEINLINE USpringArmComponent* GetCameraboom() const {return CameraBoom;}
+	FORCEINLINE USpringArmComponent* GetCameraBoom() const {return CameraBoom;}
 	FORCEINLINE UCameraComponent* GetFollowCamera() const {return FollowCamera;}
+	FORCEINLINE bool GetAiming() const {return bAiming;}
 
 	/**
 	 * Called via input to turn at a given rate

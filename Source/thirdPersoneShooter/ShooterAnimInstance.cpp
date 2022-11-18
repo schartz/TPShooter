@@ -42,6 +42,10 @@
        			LastMovementOffsetYaw = MovementOffsetYaw;
        		}
 
+
+       		// is the character aiming?
+       		bAiming = ShooterCharacter->GetAiming();
+
             /*
             FString RotationMessage = FString::Printf(TEXT("Base Aim Rotation: %f"), AimRotation.Yaw);
             FString MovementRotationMessage = FString::Printf(TEXT("Movement Rotation: %f"), MovementRotation.Yaw);
