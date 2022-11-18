@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"name": "thirdPersoneShooter",
+			"path": "."
+		},
+		{
+			"name": "UE5",
+			"path": "/run/media/neo/ssd_storage/ue5"
+		}
+	],
+	"settings": {
+		"typescript.tsc.autoDetect": "off"
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-vscode.cpptools",
+			"ms-dotnettools.csharp",
+			"vadimcn.vscode-lldb",
+			"ms-vscode.mono-debug",
+			"dfarley1.file-picker"
+		]
+	}
+}
