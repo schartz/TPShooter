@@ -24,9 +24,12 @@ protected:
 
 	// called for left/right input
 	void MoveRight(float value);
-
-
+	
 	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBeamLocation);
+
+	// Set bAiming to tru or false with button press
+	void AimingButtonPressed();
+	void AimingButtonReleased();
 
 public:	
 	// Called every frame
@@ -75,6 +78,17 @@ private:
 	// montage for firing the weapon
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Combat, meta=(AllowPrivateAccess = "true"))
 	class UAnimMontage* HipFireMontage;
+
+	// true when aiming
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Combat, meta=(AllowPrivateAccess = "true"))
+	bool bAiming;
+
+	// default camera field of view value
+	// higher FOV more you see!
+	float CameraDefaultFOV;
+
+	// camera field of view value when zoomed in
+	float CameraZoomedFOV;
 
 
 public:

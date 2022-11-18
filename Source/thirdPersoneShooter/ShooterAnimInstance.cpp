@@ -29,14 +29,18 @@
             // is the character in the air?
             bIsInAir = ShooterCharacter->GetCharacterMovement()->IsFalling();
 
-            // is the character accelrating?
+            // is the character accelerating?
             // here we will use the oversimplification that acceleration = movement
             // I know that is wrong, but is works good enough for our purposes without complicating things
             bIsAccelrating = (ShooterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0);
 
-            FRotator AimRotation = ShooterCharacter->GetBaseAimRotation();
-            FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(ShooterCharacter->GetVelocity());
+            const FRotator AimRotation = ShooterCharacter->GetBaseAimRotation();
+            const FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(ShooterCharacter->GetVelocity());
             MovementOffsetYaw = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AimRotation).Yaw;
+       		if (ShooterCharacter->GetVelocity().Size() > 0.f)
+       		{
+       			LastMovementOffsetYaw = MovementOffsetYaw;
+       		}
 
             /*
             FString RotationMessage = FString::Printf(TEXT("Base Aim Rotation: %f"), AimRotation.Yaw);

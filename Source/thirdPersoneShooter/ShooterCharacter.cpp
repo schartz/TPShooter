@@ -14,7 +14,10 @@
 // Sets default values
 AShooterCharacter::AShooterCharacter() : 
 	BaseTurnRate(45.f),
-	BaseLookupRate(45.f)
+	BaseLookupRate(45.f),
+	bAiming(false),
+	CameraDefaultFOV(0.f), // we're setting this in `BeginPlay` function
+	CameraZoomedFOV(60.f)
 	
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -60,9 +63,14 @@ void AShooterCharacter::BeginPlay()
 	// this is Unreal engines internal string type
 	// * here is an overloaded method to get C style string from FString object
 	// here, it is NOT pointer dereferencing
-	FString myString {TEXT("My Sring!!!")};
-	UE_LOG(LogTemp, Warning, TEXT("my FString: %s"), *myString)
-	UE_LOG(LogTemp, Warning, TEXT("this instance is: %s"), *GetName());
+	FString msg {TEXT("Beginng gameplay!!!")};
+	UE_LOG(LogTemp, Warning, TEXT("Init message: %s"), *msg)
+	UE_LOG(LogTemp, Warning, TEXT("his instance is: %s"), *GetName());
+
+	if (FollowCamera)
+	{
+		CameraDefaultFOV = GetFollowCamera()->FieldOfView;
+	}
 	
 }
 
@@ -89,6 +97,9 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAction("FireButton", IE_Pressed, this, &AShooterCharacter::FireWeapon);
+
+	PlayerInputComponent->BindAction("AimingButton", IE_Pressed, this, &AShooterCharacter::AimingButtonPressed);
+	PlayerInputComponent->BindAction("AimingButton", IE_Released, this, &AShooterCharacter::AimingButtonReleased);
 
 }
 
@@ -248,5 +259,17 @@ bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, 
 		return true;
 	}
 	return false;
+}
+
+void AShooterCharacter::AimingButtonPressed()
+{
+	bAiming = true;
+	GetFollowCamera()->SetFieldOfView(CameraZoomedFOV);
+}
+
+void AShooterCharacter::AimingButtonReleased()
+{
+	bAiming = false;
+	GetFollowCamera()->SetFieldOfView(CameraDefaultFOV);
 }
 

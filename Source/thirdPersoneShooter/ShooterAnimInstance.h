@@ -33,6 +33,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
 	float MovementOffsetYaw;
 
+	// offset yaw of the frame before we stopped moving
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
+	float LastMovementOffsetYaw;
+
 public:
 
 	// this function is like beginPlay but for animations
