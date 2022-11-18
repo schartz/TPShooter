@@ -12,14 +12,31 @@
 #include "Particles/ParticleSystemComponent.h"
 
 // Sets default values
-AShooterCharacter::AShooterCharacter() : 
-	BaseTurnRate(45.f),
-	BaseLookupRate(45.f),
-	bAiming(false),
-	CameraDefaultFOV(0.f), // we're setting this in `BeginPlay` function
-	CameraZoomedFOV(38.f),
-	CameraCurrentFOV(0.f),
-	ZoomInterpSpeed(20.f)
+AShooterCharacter::AShooterCharacter() :
+// turn and look up rates base values
+BaseTurnRate(45.f),
+BaseLookupRate(45.f),
+
+// turn and look up rates for aiming/notaiming
+HipTurnRate(90.f),
+HipLookupRate(90.f),
+AimingTurnRate(20.f),
+AimingLookupRate(20.f),
+
+// mouse look sensitivity scale factors
+MouseHipTurnRate(1.f),
+MouseHipLookupRate(1.f),
+MouseAimingTurnRate(0.5f),
+MouseAimingLookupRate(0.5f),
+
+// true when aiming the weapon
+bAiming(false),
+
+// camera field of view values
+CameraDefaultFOV(0.f), // we're setting this in `BeginPlay` function
+CameraZoomedFOV(38.f),
+CameraCurrentFOV(0.f),
+ZoomInterpSpeed(20.f)
 	
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -85,6 +102,11 @@ void AShooterCharacter::Tick(float DeltaTime)
 	// update camera FOV if aiming button is pressed
 	UpdateCameraFieldOfView(DeltaTime);
 
+	// change look sensitivity based on aiming
+	UpdateTurnAndLookupRates();
+
+	CalculateCrosshairSpread(DeltaTime);
+
 }
 
 void AShooterCharacter::UpdateCameraFieldOfView(float DeltaTime)
@@ -120,13 +142,16 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AShooterCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AShooterCharacter::MoveRight);
+	
 	PlayerInputComponent->BindAxis("TurnRate", this, &AShooterCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookupRate", this, &AShooterCharacter::LookupAtRate);
-	PlayerInputComponent->BindAxis("TurnByMouse", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("LookupByMouse", this, &APawn::AddControllerPitchInput);
+	
+	PlayerInputComponent->BindAxis("TurnByMouse", this, &AShooterCharacter::TurnByMouse);
+	PlayerInputComponent->BindAxis("LookupByMouse", this, &AShooterCharacter::LookupByMouse);
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	
 	PlayerInputComponent->BindAction("FireButton", IE_Pressed, this, &AShooterCharacter::FireWeapon);
 
 	PlayerInputComponent->BindAction("AimingButton", IE_Pressed, this, &AShooterCharacter::AimingButtonPressed);
@@ -176,6 +201,34 @@ void AShooterCharacter::LookupAtRate(float rate)
 {
 	// when you up and down, that rotatory motion of your head is called pitch
 	AddControllerPitchInput(rate * BaseLookupRate * GetWorld()->GetDeltaSeconds());
+}
+
+void AShooterCharacter::TurnByMouse(float Value)
+{
+	float ScaleFactor;
+	if (bAiming)
+	{
+		ScaleFactor = MouseAimingTurnRate;
+	} else
+	{
+		ScaleFactor = MouseHipLookupRate;
+	}
+
+	AddControllerYawInput(Value * ScaleFactor);
+}
+
+void AShooterCharacter::LookupByMouse(float Value)
+{
+	float ScaleFactor;
+	if (bAiming)
+	{
+		ScaleFactor = MouseAimingLookupRate;
+	} else
+	{
+		ScaleFactor = MouseHipLookupRate;
+	}
+
+	AddControllerPitchInput(Value * ScaleFactor);
 }
 
 void AShooterCharacter::FireWeapon()
@@ -292,6 +345,8 @@ bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, 
 	return false;
 }
 
+/***************************Utility Functions******************/
+
 void AShooterCharacter::AimingButtonPressed()
 {
 	bAiming = true;
@@ -300,5 +355,40 @@ void AShooterCharacter::AimingButtonPressed()
 void AShooterCharacter::AimingButtonReleased()
 {
 	bAiming = false;
+}
+
+void AShooterCharacter::UpdateTurnAndLookupRates()
+{
+	if(bAiming)
+	{
+		BaseTurnRate = AimingTurnRate;
+		BaseLookupRate = AimingLookupRate;
+	}
+	else
+	{
+		BaseTurnRate = HipTurnRate;
+		BaseLookupRate = HipLookupRate;
+	}
+}
+
+
+float AShooterCharacter::GetCrosshairSpreadMultiplier() const
+{
+	return CrosshairSpreadMultiplier;
+}
+
+void AShooterCharacter::CalculateCrosshairSpread(float DeltaTime)
+{
+	FVector2d WalkSpeedRange {0.f, 600.f};
+	FVector2d VelocityFactorRange{0.f, 1.f};
+	FVector CurrentVelocity {GetVelocity()};
+	CurrentVelocity.Z = 0.f;
+
+	CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(
+		WalkSpeedRange,
+		VelocityFactorRange,
+		CurrentVelocity.Size());
+	
+	CrosshairSpreadMultiplier = 0.5f + CrosshairVelocityFactor;
 }
 

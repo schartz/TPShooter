@@ -27,10 +27,18 @@ protected:
 	
 	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBeamLocation);
 
-	// Set bAiming to tru or false with button press
+	// Set bAiming to true or false with button press
 	void AimingButtonPressed();
 	void AimingButtonReleased();
+
+	// update field of view based on aiming
 	void UpdateCameraFieldOfView(float DeltaTime);
+
+	// update lookup and turn rates based on aiming
+	void UpdateTurnAndLookupRates();
+	
+	void CalculateCrosshairSpread(float DeltaTime);
+	
 
 public:	
 	// Called every frame
@@ -49,6 +57,44 @@ private:
 	// base look up / look down rate in degrees/second. other scaling will be applied in further usage
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera, meta=(AllowPrivateAccess = "true"))
 	float BaseLookupRate;
+
+	// turn rate while not aiming
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Camera, meta=(AllowPrivateAccess = "true"))
+	float HipTurnRate;
+
+	// look up rate while not aiming
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Camera, meta=(AllowPrivateAccess = "true"))
+	float HipLookupRate;
+	
+	// turn rate while aiming
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Camera, meta=(AllowPrivateAccess = "true"))
+	float AimingTurnRate;
+
+	// look up rate while aiming
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Camera, meta=(AllowPrivateAccess = "true"))
+	float AimingLookupRate;
+
+
+	
+	// Scale factor for mouse X sensitivity. Turn rate when not aiming
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Camera, meta=(AllowPrivateAccess = "true"),
+		meta=(ClampMin="0.0", ClampMax="1.0", UIMin="0.0", UIMax="1.0"))
+	float MouseHipTurnRate;
+
+	// Scale factor for mouse Y sensitivity. Look up rate when not aiming
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Camera, meta=(AllowPrivateAccess = "true"),
+		meta=(ClampMin="0.0", ClampMax="1.0", UIMin="0.0", UIMax="1.0"))
+	float MouseHipLookupRate;
+	
+	// Scale factor for mouse X sensitivity. Turn rate when aiming
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Camera, meta=(AllowPrivateAccess = "true"),
+		meta=(ClampMin="0.0", ClampMax="1.0", UIMin="0.0", UIMax="1.0"))
+	float MouseAimingTurnRate;
+
+	// Scale factor for mouse Y sensitivity. Look up rate when aiming
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Camera, meta=(AllowPrivateAccess = "true"),
+		meta=(ClampMin="0.0", ClampMax="1.0", UIMin="0.0", UIMax="1.0"))
+	float MouseAimingLookupRate;
 
 
 
@@ -98,23 +144,58 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Combat, meta=(AllowPrivateAccess = "true"))
 	float ZoomInterpSpeed;
 
+	// determines the spreading of crosshairs
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Crosshairs, meta=(AllowPrivateAccess = "true"))
+	float CrosshairSpreadMultiplier;
+
+	// velocity component for crosshair spread
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Crosshairs, meta=(AllowPrivateAccess = "true"))
+	float CrosshairVelocityFactor;
+
+	// jumping/falling component for crosshair spread
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Crosshairs, meta=(AllowPrivateAccess = "true"))
+	float CrosshairInAirFactor;
+
+	// aiming component for crosshair spread
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Crosshairs, meta=(AllowPrivateAccess = "true"))
+	float CrosshairAimFactor;
+
+	// firing a weapon component for crosshair spread
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Crosshairs, meta=(AllowPrivateAccess = "true"))
+	float CrosshairShootingFactor;
+
 
 public:
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const {return CameraBoom;}
 	FORCEINLINE UCameraComponent* GetFollowCamera() const {return FollowCamera;}
 	FORCEINLINE bool GetAiming() const {return bAiming;}
 
+	UFUNCTION(BlueprintCallable)
+	float GetCrosshairSpreadMultiplier() const;
+
 	/**
 	 * Called via input to turn at a given rate
 	 * @param Rate normalized rate. 1.0 means 100% of desired turn rate
 	*/
-	void TurnAtRate(float rate);
+	void TurnAtRate(float Rate);
 
 	/**
 	 * Called via input to look up and down at a given rate
 	 * @param Rate normalized rate. 1.0 means 100% of desired lookup rate
 	*/
-	void LookupAtRate(float rate);
+	void LookupAtRate(float Rate);
+
+	/**
+	 * Rotate controller based on mouse X movement
+	 * @param Value normalized value. Input value from mouse movement
+	*/
+	void TurnByMouse(float Value);
+
+	/**
+	 * Rotate controller based on mouse Y movement
+	 * @param Value normalized value. Input value from mouse movement
+	*/
+	void LookupByMouse(float Value);
 
 	// called when the fire button is pressed
 	void FireWeapon();
