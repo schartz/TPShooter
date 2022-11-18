@@ -30,6 +30,7 @@ protected:
 	// Set bAiming to tru or false with button press
 	void AimingButtonPressed();
 	void AimingButtonReleased();
+	void UpdateCameraFieldOfView(float DeltaTime);
 
 public:	
 	// Called every frame
@@ -89,6 +90,13 @@ private:
 
 	// camera field of view value when zoomed in
 	float CameraZoomedFOV;
+
+	// camera field of view this frame
+	float CameraCurrentFOV;
+
+	// interpolation speed for zooming when aiming
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Combat, meta=(AllowPrivateAccess = "true"))
+	float ZoomInterpSpeed;
 
 
 public:
