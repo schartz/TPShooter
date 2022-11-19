@@ -3,4 +3,5 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UMG.h"
 

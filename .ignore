@@ -1,8 +1,9 @@
 .idea
 Content
 cmake-build-debug
+.git
 Saved
-Script
 Intermediate
 DerivedDataCache
 .vscode
+Plugins/Developer/RiderLink/Intermediate
