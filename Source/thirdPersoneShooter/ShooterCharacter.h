@@ -39,10 +39,16 @@ protected:
 	
 	void CalculateCrosshairSpread(float DeltaTime);
 
-
+	// start a small timer when bullet fires
 	void StartCrosshairBulletFire();
 	UFUNCTION()
 	void FinishCrossHairBulletFire();
+
+	void FireButtonPressed();
+	void FireButtonReleased();
+	void StartFireTimer();
+	UFUNCTION()
+	void AutoFireReset();
 	
 
 public:	
@@ -169,9 +175,22 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Crosshairs, meta=(AllowPrivateAccess = "true"))
 	float CrosshairShootingFactor;
 
+	// timers for single bullet fire
 	float ShootTimeDuration;
 	bool bFiringBullet;
 	FTimerHandle CrosshairShootTimer;
+
+	// LMB or RCT pressed
+	bool bFireButtonPressed;
+
+	// true when we can fire, false when waiting for the timer
+	bool bShouldFire;
+
+	// bullet fire rate from a Gun
+	float AutoFireRate;
+
+	// sets a timer between two timers
+	FTimerHandle AutoFireTimer;
 
 
 public:

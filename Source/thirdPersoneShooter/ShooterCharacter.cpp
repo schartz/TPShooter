@@ -47,7 +47,15 @@ CrosshairShootingFactor(0.f),
 
 // bullet fire timer variables
 ShootTimeDuration(0.05f),
-bFiringBullet(false)
+bFiringBullet(false),
+
+// automatic fire variables
+bFireButtonPressed(false),
+bShouldFire(true),
+
+// automatic gun fire rate
+AutoFireRate(0.1f)
+
 	
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -163,7 +171,8 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	
-	PlayerInputComponent->BindAction("FireButton", IE_Pressed, this, &AShooterCharacter::FireWeapon);
+	PlayerInputComponent->BindAction("FireButton", IE_Pressed, this, &AShooterCharacter::FireButtonPressed);
+	PlayerInputComponent->BindAction("FireButton", IE_Released, this, &AShooterCharacter::FireButtonReleased);
 
 	PlayerInputComponent->BindAction("AimingButton", IE_Pressed, this, &AShooterCharacter::AimingButtonPressed);
 	PlayerInputComponent->BindAction("AimingButton", IE_Released, this, &AShooterCharacter::AimingButtonReleased);
@@ -439,7 +448,7 @@ void AShooterCharacter::CalculateCrosshairSpread(float DeltaTime)
 	// this is True 0.05 seconds after firing a single bullet
 	if(bFiringBullet)
 	{
-		CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.3f, DeltaTime, 60.f);
+		CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.4f, DeltaTime, 60.f);
 	}
 	else
 	{
@@ -464,5 +473,35 @@ void AShooterCharacter::StartCrosshairBulletFire()
 void AShooterCharacter::FinishCrossHairBulletFire()
 {
 	bFiringBullet = false;
+}
+
+void AShooterCharacter::FireButtonPressed()
+{
+	bFireButtonPressed = true;
+	StartFireTimer();
+}
+
+void AShooterCharacter::FireButtonReleased()
+{
+	bFireButtonPressed = false;
+}
+
+void AShooterCharacter::StartFireTimer()
+{
+	if (bShouldFire)
+	{
+		FireWeapon();
+		bShouldFire = false;
+		GetWorldTimerManager().SetTimer(AutoFireTimer, this, &AShooterCharacter::AutoFireReset, AutoFireRate);
+	}
+}
+
+void AShooterCharacter::AutoFireReset()
+{
+	bShouldFire = true;
+	if(bFireButtonPressed)
+	{
+		StartFireTimer();
+	}
 }
 
