@@ -15,6 +15,9 @@ public:
 	// Sets default values for this character's properties
 	AShooterCharacter();
 
+	inline static const float MAX_TRACE_DISTANCE_FOR_SHOOTING{50000.f};
+	inline static const float MAX_TRACE_DISTANCE_FOR_ITEMS {20000.f};
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -47,8 +50,12 @@ protected:
 	void FireButtonPressed();
 	void FireButtonReleased();
 	void StartFireTimer();
+
 	UFUNCTION()
 	void AutoFireReset();
+
+	// line trace for items under the crosshair
+	bool TraceUnderCrosshair(FHitResult& OutHitResult, FVector& OutHitLocation);
 	
 
 public:	
