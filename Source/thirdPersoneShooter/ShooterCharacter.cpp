@@ -56,7 +56,12 @@ bFireButtonPressed(false),
 bShouldFire(true),
 
 // automatic gun fire rate
-AutoFireRate(0.1f)
+AutoFireRate(0.1f),
+
+// item trace variables
+bShouldTraceForItems(false),
+
+OverlappedItemCount(0)
 
 	
 {
@@ -127,6 +132,9 @@ void AShooterCharacter::Tick(float DeltaTime)
 	UpdateTurnAndLookupRates();
 
 	CalculateCrosshairSpread(DeltaTime);
+
+	// check OverlappedItemCount then trace for items
+	TraceForItems();
 
 }
 
@@ -438,6 +446,24 @@ void AShooterCharacter::CalculateCrosshairSpread(float DeltaTime)
 		CrosshairShootingFactor;
 }
 
+void AShooterCharacter::TraceForItems()
+{
+	if(bShouldTraceForItems)
+	{
+		FHitResult ItemTraceResult;
+		FVector HitLocation;
+		TraceUnderCrosshair(ItemTraceResult, HitLocation);
+		if (ItemTraceResult.bBlockingHit)
+		{
+			AItem* HitItem = Cast<AItem>(ItemTraceResult.GetActor());
+			if(HitItem and HitItem->GetPickupWidget())
+			{
+				HitItem->GetPickupWidget()->SetVisibility(true);
+			}
+		}
+	}
+}
+
 void AShooterCharacter::StartCrosshairBulletFire()
 {
 	bFiringBullet = true;
@@ -528,3 +554,16 @@ bool AShooterCharacter::TraceUnderCrosshair(
 	return false;
 }
 
+
+void AShooterCharacter::IncrementOverlappedItemCount(int8 Amount)
+{
+	if(OverlappedItemCount + Amount <= 0)
+	{
+		OverlappedItemCount = 0;
+		bShouldTraceForItems = false;
+	} else
+	{
+		OverlappedItemCount += Amount;
+		bShouldTraceForItems = true;
+	}
+}
