@@ -38,6 +38,11 @@ protected:
 	void UpdateTurnAndLookupRates();
 	
 	void CalculateCrosshairSpread(float DeltaTime);
+
+
+	void StartCrosshairBulletFire();
+	UFUNCTION()
+	void FinishCrossHairBulletFire();
 	
 
 public:	
@@ -144,7 +149,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Combat, meta=(AllowPrivateAccess = "true"))
 	float ZoomInterpSpeed;
 
-	// determines the spreading of crosshairs
+	// determines the spreading of crosshair
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Crosshairs, meta=(AllowPrivateAccess = "true"))
 	float CrosshairSpreadMultiplier;
 
@@ -163,6 +168,10 @@ private:
 	// firing a weapon component for crosshair spread
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Crosshairs, meta=(AllowPrivateAccess = "true"))
 	float CrosshairShootingFactor;
+
+	float ShootTimeDuration;
+	bool bFiringBullet;
+	FTimerHandle CrosshairShootTimer;
 
 
 public:
