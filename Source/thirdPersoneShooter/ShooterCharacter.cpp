@@ -10,6 +10,9 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "DrawDebugHelpers.h"
 #include "Item.h"
+#include "Weapon.h"
+#include "Components/SphereComponent.h"
+#include "Components/BoxComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 
@@ -117,6 +120,9 @@ void AShooterCharacter::BeginPlay()
 		CameraDefaultFOV = GetFollowCamera()->FieldOfView;
 		CameraCurrentFOV = CameraDefaultFOV;
 	}
+
+	// Spawn the default weapon attach this to the mesh
+	EquipWeapon(SpawnDefaultWeapon());
 	
 }
 
@@ -476,7 +482,7 @@ void AShooterCharacter::TraceForItems()
 		}
 	} else if(TraceHitItemLastFrame)
 	{
-		// No linger overlapping with any item
+		// No longer overlapping with any item
 		// TraceHitItemLastFrame should not show widget
 		TraceHitItemLastFrame->GetPickupWidget()->SetVisibility(false);
 	}
@@ -572,7 +578,6 @@ bool AShooterCharacter::TraceUnderCrosshair(
 	return false;
 }
 
-
 void AShooterCharacter::IncrementOverlappedItemCount(int8 Amount)
 {
 	if(OverlappedItemCount + Amount <= 0)
@@ -583,5 +588,40 @@ void AShooterCharacter::IncrementOverlappedItemCount(int8 Amount)
 	{
 		OverlappedItemCount += Amount;
 		bShouldTraceForItems = true;
+	}
+}
+
+AWeapon* AShooterCharacter::SpawnDefaultWeapon()
+{
+	// check the TSubClassOf variable
+	if(DefaultWeaponClass)
+	{
+		// spawn the weapon
+		return GetWorld()->SpawnActor<AWeapon>(DefaultWeaponClass);
+	}
+
+	return nullptr;
+}
+
+void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
+{
+	if(WeaponToEquip)
+	{
+		// set area and collision box to ignore all collisions
+		WeaponToEquip->GetAreaSphere()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		WeaponToEquip->GetCollisionBox()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+		// Get the socket
+		const USkeletalMeshSocket* HandSocket = GetMesh()->GetSocketByName(FName("RightHandSocket"));
+
+		if(HandSocket)
+		{
+			// attach the weapon to the HandSocket RightHandSocket
+			HandSocket->AttachActor(WeaponToEquip, GetMesh());
+			EquippedWeapon = WeaponToEquip;
+
+			// update the item state
+			EquippedWeapon->SetItemState(EItemState::EIS_Equipped);
+		}
 	}
 }

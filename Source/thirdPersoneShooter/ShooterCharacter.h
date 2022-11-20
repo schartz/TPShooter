@@ -59,6 +59,12 @@ protected:
 
 	// Trace for items in vicibity is overlapped item count > 0
 	void TraceForItems();
+
+	// Spawns a default weapon and equips it
+	class AWeapon* SpawnDefaultWeapon();
+
+	// take a weapon and equips it
+	void EquipWeapon(class AWeapon* WeaponToEquip);
 	
 
 public:	
@@ -208,8 +214,17 @@ private:
 	// number of currently overlapping items
 	int8 OverlappedItemCount;
 
+	// keeps track of the last item traced
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Items, meta=(AllowPrivateAccess="true"))
 	class AItem* TraceHitItemLastFrame;
+
+	// currently equipped weapon
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Combat, meta=(AllowPrivateAccess="true"))
+	class AWeapon* EquippedWeapon;
+
+	// Set this in blueprints for the defaults weapons class
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Combat, meta=(AllowPrivateAccess="true"))
+	TSubclassOf<AWeapon> DefaultWeaponClass;
 
 
 public:
