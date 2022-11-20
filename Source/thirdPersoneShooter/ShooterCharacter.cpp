@@ -460,7 +460,25 @@ void AShooterCharacter::TraceForItems()
 			{
 				HitItem->GetPickupWidget()->SetVisibility(true);
 			}
+
+			if (TraceHitItemLastFrame)
+			{
+				if(HitItem != TraceHitItemLastFrame)
+				{
+					// we are hitting a different AItem this frame from last frame
+					// or AItem us null
+					TraceHitItemLastFrame->GetPickupWidget()->SetVisibility(false);
+				}
+			}
+			
+			// store a reference to HitItem for nex frame
+			TraceHitItemLastFrame = HitItem;
 		}
+	} else if(TraceHitItemLastFrame)
+	{
+		// No linger overlapping with any item
+		// TraceHitItemLastFrame should not show widget
+		TraceHitItemLastFrame->GetPickupWidget()->SetVisibility(false);
 	}
 }
 

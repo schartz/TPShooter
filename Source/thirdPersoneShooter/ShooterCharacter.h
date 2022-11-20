@@ -208,6 +208,9 @@ private:
 	// number of currently overlapping items
 	int8 OverlappedItemCount;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Items, meta=(AllowPrivateAccess="true"))
+	class AItem* TraceHitItemLastFrame;
+
 
 public:
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const {return CameraBoom;}
