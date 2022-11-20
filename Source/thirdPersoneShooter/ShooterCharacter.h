@@ -220,16 +220,16 @@ private:
 	// true if we should trace for items every frame
 	bool bShouldTraceForItems;
 
+	// number of currently overlapping items
+	int8 OverlappedItemCount;
+
 	// The item currently hit by our trace in TraceForItems (could be null)
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Items, meta=(AllowPrivateAccess="true"))
 	class AItem* TracedHitItem;
 
-	// number of currently overlapping items
-	int8 OverlappedItemCount;
-
 	// keeps track of the last item traced
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Items, meta=(AllowPrivateAccess="true"))
-	class AItem* TraceHitItemLastFrame;
+	class AItem* TracedHitItemLastFrame;
 
 	// currently equipped weapon
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Combat, meta=(AllowPrivateAccess="true"))

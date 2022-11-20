@@ -468,24 +468,24 @@ void AShooterCharacter::TraceForItems()
 				TracedHitItem->GetPickupWidget()->SetVisibility(true);
 			}
 
-			if (TraceHitItemLastFrame)
+			if (TracedHitItemLastFrame)
 			{
-				if(TracedHitItem != TraceHitItemLastFrame)
+				if(TracedHitItem != TracedHitItemLastFrame)
 				{
 					// we are hitting a different AItem this frame from last frame
 					// or AItem us null
-					TraceHitItemLastFrame->GetPickupWidget()->SetVisibility(false);
+					TracedHitItemLastFrame->GetPickupWidget()->SetVisibility(false);
 				}
 			}
 			
 			// store a reference to HitItem for nex frame
-			TraceHitItemLastFrame = TracedHitItem;
+			TracedHitItemLastFrame = TracedHitItem;
 		}
-	} else if(TraceHitItemLastFrame)
+	} else if(TracedHitItemLastFrame)
 	{
 		// No longer overlapping with any item
 		// TraceHitItemLastFrame should not show widget
-		TraceHitItemLastFrame->GetPickupWidget()->SetVisibility(false);
+		TracedHitItemLastFrame->GetPickupWidget()->SetVisibility(false);
 	}
 }
 
@@ -657,4 +657,6 @@ void AShooterCharacter::SwapWeapon(AWeapon* WeaponToSwap)
 {
 	DropWeapon();
 	EquipWeapon(WeaponToSwap);
+	TracedHitItem = nullptr;
+	TracedHitItemLastFrame = nullptr;
 }
