@@ -2,7 +2,8 @@
 .vscode
 Binaries
 cmake-build-debug
-Content
+Content/*
+!Content/_Game
 DerivedDataCache
 Intermediate
 Saved
