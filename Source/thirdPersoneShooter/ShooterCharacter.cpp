@@ -11,8 +11,6 @@
 #include "DrawDebugHelpers.h"
 #include "Item.h"
 #include "Weapon.h"
-#include "Components/SphereComponent.h"
-#include "Components/BoxComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 
@@ -192,6 +190,9 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	PlayerInputComponent->BindAction("AimingButton", IE_Pressed, this, &AShooterCharacter::AimingButtonPressed);
 	PlayerInputComponent->BindAction("AimingButton", IE_Released, this, &AShooterCharacter::AimingButtonReleased);
+
+	PlayerInputComponent->BindAction("TakeActionButton", IE_Pressed, this, &AShooterCharacter::TakeActionButtonPressed);
+	PlayerInputComponent->BindAction("TakeActionButton", IE_Released, this, &AShooterCharacter::TakeActionButtonReleased);
 
 }
 
@@ -461,15 +462,15 @@ void AShooterCharacter::TraceForItems()
 		TraceUnderCrosshair(ItemTraceResult, HitLocation);
 		if (ItemTraceResult.bBlockingHit)
 		{
-			AItem* HitItem = Cast<AItem>(ItemTraceResult.GetActor());
-			if(HitItem and HitItem->GetPickupWidget())
+			TracedHitItem = Cast<AItem>(ItemTraceResult.GetActor());
+			if(TracedHitItem and TracedHitItem->GetPickupWidget())
 			{
-				HitItem->GetPickupWidget()->SetVisibility(true);
+				TracedHitItem->GetPickupWidget()->SetVisibility(true);
 			}
 
 			if (TraceHitItemLastFrame)
 			{
-				if(HitItem != TraceHitItemLastFrame)
+				if(TracedHitItem != TraceHitItemLastFrame)
 				{
 					// we are hitting a different AItem this frame from last frame
 					// or AItem us null
@@ -478,7 +479,7 @@ void AShooterCharacter::TraceForItems()
 			}
 			
 			// store a reference to HitItem for nex frame
-			TraceHitItemLastFrame = HitItem;
+			TraceHitItemLastFrame = TracedHitItem;
 		}
 	} else if(TraceHitItemLastFrame)
 	{
@@ -515,6 +516,24 @@ void AShooterCharacter::FireButtonReleased()
 	bFireButtonPressed = false;
 }
 
+void AShooterCharacter::TakeActionButtonPressed()
+{
+	if (TracedHitItem)
+	{
+		AWeapon* TracedHitWeapon = Cast<AWeapon>(TracedHitItem);
+	
+		if(TracedHitWeapon)
+		{
+			SwapWeapon(TracedHitWeapon);
+		}
+	}
+	
+}
+
+void AShooterCharacter::TakeActionButtonReleased()
+{
+}
+
 void AShooterCharacter::StartFireTimer()
 {
 	if (bShouldFire)
@@ -524,6 +543,7 @@ void AShooterCharacter::StartFireTimer()
 		GetWorldTimerManager().SetTimer(AutoFireTimer, this, &AShooterCharacter::AutoFireReset, AutoFireRate);
 	}
 }
+
 
 void AShooterCharacter::AutoFireReset()
 {
@@ -620,4 +640,21 @@ void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
 			EquippedWeapon->SetItemState(EItemState::EIS_Equipped);
 		}
 	}
+}
+
+void AShooterCharacter::DropWeapon()
+{
+	if(EquippedWeapon)
+	{
+		const FDetachmentTransformRules DetachmentTransformRules(EDetachmentRule::KeepWorld, true);
+		EquippedWeapon->GetItemMesh()->DetachFromComponent(DetachmentTransformRules);
+		EquippedWeapon->SetItemState(EItemState::EIS_Falling);
+		EquippedWeapon->ThrowWeapon();
+	}
+}
+
+void AShooterCharacter::SwapWeapon(AWeapon* WeaponToSwap)
+{
+	DropWeapon();
+	EquipWeapon(WeaponToSwap);
 }

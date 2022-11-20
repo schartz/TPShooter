@@ -51,6 +51,9 @@ protected:
 	void FireButtonReleased();
 	void StartFireTimer();
 
+	void TakeActionButtonPressed();
+	void TakeActionButtonReleased();
+
 	UFUNCTION()
 	void AutoFireReset();
 
@@ -65,6 +68,12 @@ protected:
 
 	// take a weapon and equips it
 	void EquipWeapon(class AWeapon* WeaponToEquip);
+
+	// drop the currently Equipped weapon
+	void DropWeapon();
+
+	// Drop currently equipped weapon and equip WeaponToSwap
+	void SwapWeapon(class AWeapon* WeaponToSwap);
 	
 
 public:	
@@ -210,6 +219,10 @@ private:
 
 	// true if we should trace for items every frame
 	bool bShouldTraceForItems;
+
+	// The item currently hit by our trace in TraceForItems (could be null)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Items, meta=(AllowPrivateAccess="true"))
+	class AItem* TracedHitItem;
 
 	// number of currently overlapping items
 	int8 OverlappedItemCount;
