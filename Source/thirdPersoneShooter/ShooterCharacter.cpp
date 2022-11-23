@@ -62,7 +62,11 @@ AutoFireRate(0.1f),
 // item trace variables
 bShouldTraceForItems(false),
 
-OverlappedItemCount(0)
+OverlappedItemCount(0),
+
+// camera interp location variables
+CameraInterpDistance(250.f),
+CameraInterpElevation(65.f)
 
 	
 {
@@ -520,12 +524,14 @@ void AShooterCharacter::TakeActionButtonPressed()
 {
 	if (TracedHitItem)
 	{
-		AWeapon* TracedHitWeapon = Cast<AWeapon>(TracedHitItem);
+		TracedHitItem->StartItemCurve(this);
+		
+		/*AWeapon* TracedHitWeapon = Cast<AWeapon>(TracedHitItem);
 	
 		if(TracedHitWeapon)
 		{
 			SwapWeapon(TracedHitWeapon);
-		}
+		}*/
 	}
 	
 }
@@ -659,4 +665,25 @@ void AShooterCharacter::SwapWeapon(AWeapon* WeaponToSwap)
 	EquipWeapon(WeaponToSwap);
 	TracedHitItem = nullptr;
 	TracedHitItemLastFrame = nullptr;
+}
+
+FVector AShooterCharacter::GetCameraInterpLocation()
+{
+	const FVector CameraLocation{FollowCamera->GetComponentLocation()};
+	const FVector CameraForward{FollowCamera->GetForwardVector()};
+	
+	//Can also do CameraUp = FVector CameraUp{FollowCamera->GetUpVector()}; CameraUp * CameraInterpElevation;
+	// instead of FVector(0.f, 0.f, CameraInterpElevation)
+
+	return CameraLocation + CameraForward * CameraInterpDistance + FVector(0.f, 0.f, CameraInterpElevation);
+}
+
+void AShooterCharacter::GetPickupItem(AItem* Item)
+{
+	auto Weapon = Cast<AWeapon>(Item);
+
+	if (Weapon)
+	{
+		SwapWeapon(Weapon);
+	}
 }

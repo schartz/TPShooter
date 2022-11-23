@@ -67,6 +67,12 @@ protected:
 	// sets properties of the item's components based on state
 	void SetItemProperties(EItemState State);
 
+	// called when ItemInterpTimer is finished
+	void FinishInterping();
+
+	// handles item interpolation when in EquipInterping state
+	void ItemInterp(float DeltaTime);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -107,6 +113,37 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
 	EItemState ItemState;
 
+	// the curve asset that is used for the item's Z location when it is interping
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
+	class UCurveFloat* ItemZCurve;
+
+	// starting location when interping begins
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
+	FVector ItemInterpStartLocation;
+
+	// target interp location front of the camera
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
+	FVector CameraTargetLocation;
+
+	// true when this item is interping
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
+	bool bInterping;
+
+	// plays when we start interping so we have a time handle
+	FTimerHandle ItemInterpTimer;
+
+	// pointer to the character
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
+	class AShooterCharacter* Character;
+
+	// Duration of the curve and timer (x axis length on the `ItemZCurve` asset)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
+	float ZCurveTime;
+
+	// X and Y for the item interping in EquipInterpingState
+	float ItemInterpX;
+	float ItemInterpY;
+
 public:
 
 	FORCEINLINE UWidgetComponent* GetPickupWidget() const {return PickupWidget;}
@@ -115,5 +152,8 @@ public:
 	FORCEINLINE USkeletalMeshComponent* GetItemMesh() const {return ItemMesh;}
 	FORCEINLINE EItemState GetItemState() const {return ItemState;}
 	void SetItemState(EItemState State);
+
+	// Called from the AShooterCharacter class
+	void StartItemCurve(class AShooterCharacter* InteractingCharacter);
 	
 };

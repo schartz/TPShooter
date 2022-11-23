@@ -239,6 +239,15 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Combat, meta=(AllowPrivateAccess="true"))
 	TSubclassOf<AWeapon> DefaultWeaponClass;
 
+	// distance outward from the camera for the interp destination
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Items, meta=(AllowPrivateAccess="true"))
+	float CameraInterpDistance;
+
+
+	// distance upward from the camera for the interp destination
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Items, meta=(AllowPrivateAccess="true"))
+	float CameraInterpElevation;
+
 
 public:
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const {return CameraBoom;}
@@ -281,5 +290,10 @@ public:
 
 	// called when the fire button is pressed
 	void FireWeapon();
+
+	//
+	FVector GetCameraInterpLocation();
+
+	void GetPickupItem(class AItem* Item);
 
 };

@@ -13,7 +13,15 @@ AItem::AItem():
 ItemName(FString("Item Name Here")),
 ItemCount(1),
 ItemRarity(EItemRarity::EIR_Common),
-ItemState(EItemState::EIS_Pickup)
+ItemState(EItemState::EIS_Pickup),
+
+// item interp variables
+ItemInterpStartLocation(FVector(0.f)),
+CameraTargetLocation(FVector(0.f)),
+bInterping(false),
+ZCurveTime(0.7f),
+ItemInterpX(0.f),
+ItemInterpY(0.f)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -59,6 +67,9 @@ void AItem::BeginPlay()
 void AItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// handle the item interping when in the Interping state
+	ItemInterp(DeltaTime);
 
 }
 
@@ -198,9 +209,87 @@ void AItem::SetItemProperties(EItemState State)
 		CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 		CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	case EItemState::EIS_EquipInterping:
+		PickupWidget->SetVisibility(false);
+
+		ItemMesh->SetSimulatePhysics(false);
+		ItemMesh->SetEnableGravity(false);
+		ItemMesh->SetVisibility(true);
+		ItemMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		break;
 	default:
 		break;
 	}
+}
+
+void AItem::StartItemCurve(AShooterCharacter* InteractingCharacter)
+{
+	// store the handle to the character
+	Character = InteractingCharacter;
+
+	// interp start location is Item's current location
+	ItemInterpStartLocation = GetActorLocation();
+	bInterping = true;
+	SetItemState(EItemState::EIS_EquipInterping);
+	GetWorldTimerManager().SetTimer(ItemInterpTimer, this, &AItem::FinishInterping, ZCurveTime);
+}
+
+void AItem::FinishInterping()
+{
+	bInterping = false;
+	if (Character)
+	{
+		Character->GetPickupItem(this);
+	}
+}
+
+void AItem::ItemInterp(float DeltaTime)
+{
+	if(!bInterping)
+	{
+		return;
+	}
+
+	if(Character && ItemZCurve)
+	{
+		// time elapsed since we started our interp timer
+		const float ElapsedTime = GetWorldTimerManager().GetTimerElapsed(ItemInterpTimer);
+
+		// get curve values corresponding to elapsed time
+		const float  CurveValue = ItemZCurve->GetFloatValue(ElapsedTime);
+
+		// get the items initial location when curve started
+		FVector ItemLocation = ItemInterpStartLocation;
+		// get location in front of the camera
+		const FVector CameraInterpLocation = Character->GetCameraInterpLocation();
+
+		// vector from item to camera location
+		const FVector ItemToCamera{FVector(0.f, 0.f, (CameraInterpLocation - ItemLocation).Z)};
+
+		// scale factor to multiply with the curve value
+		const float DeltaZ = ItemToCamera.Size();
+
+		// adding curve value to the z component of the item location, scaled by DeltaZ
+		ItemLocation.Z += CurveValue * DeltaZ;
+
+
+		const FVector CurrentLocation {GetActorLocation()};
+		const float InterpXValue = FMath::FInterpTo(CurrentLocation.X, CameraInterpLocation.X, DeltaTime, 30.f);
+		const float InterpYValue = FMath::FInterpTo(CurrentLocation.Y, CameraInterpLocation.Y, DeltaTime, 30.f);
+
+		ItemLocation.X = InterpXValue;
+		ItemLocation.Y = InterpYValue;
+		SetActorLocation(ItemLocation, true, nullptr, ETeleportType::TeleportPhysics);
+		
+	}
+	
 }
 
 
