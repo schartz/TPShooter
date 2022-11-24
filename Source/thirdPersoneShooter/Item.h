@@ -144,6 +144,9 @@ private:
 	float ItemInterpX;
 	float ItemInterpY;
 
+	// initial yaw offset between the camera and the interping item
+	float InterpInitialYawOffset;
+
 public:
 
 	FORCEINLINE UWidgetComponent* GetPickupWidget() const {return PickupWidget;}

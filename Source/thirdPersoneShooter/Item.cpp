@@ -4,6 +4,7 @@
 #include "Item.h"
 
 #include "ShooterCharacter.h"
+#include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
@@ -21,7 +22,8 @@ CameraTargetLocation(FVector(0.f)),
 bInterping(false),
 ZCurveTime(0.7f),
 ItemInterpX(0.f),
-ItemInterpY(0.f)
+ItemInterpY(0.f),
+InterpInitialYawOffset(0.f)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -239,6 +241,13 @@ void AItem::StartItemCurve(AShooterCharacter* InteractingCharacter)
 	bInterping = true;
 	SetItemState(EItemState::EIS_EquipInterping);
 	GetWorldTimerManager().SetTimer(ItemInterpTimer, this, &AItem::FinishInterping, ZCurveTime);
+
+	// Get initial Yaws of the camera and the item
+	const double CameraRotationYaw{Character->GetFollowCamera()->GetComponentRotation().Yaw};
+	const double ItemRotationYaw{GetActorRotation().Yaw};
+
+	InterpInitialYawOffset = ItemRotationYaw - CameraRotationYaw;
+	
 }
 
 void AItem::FinishInterping()
@@ -287,6 +296,11 @@ void AItem::ItemInterp(float DeltaTime)
 		ItemLocation.X = InterpXValue;
 		ItemLocation.Y = InterpYValue;
 		SetActorLocation(ItemLocation, true, nullptr, ETeleportType::TeleportPhysics);
+
+		// adjust the item rotation per frame such that it does not rotate WRT camera
+		const FRotator CameraRotation{Character->GetFollowCamera()->GetComponentRotation()};
+		const FRotator ItemRotation{0.f, CameraRotation.Yaw + InterpInitialYawOffset, 0.f};
+		SetActorRotation(ItemRotation, ETeleportType::TeleportPhysics);
 		
 	}
 	
