@@ -35,7 +35,7 @@ protected:
 	// called for left/right input
 	void MoveRight(float value);
 	
-	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBeamLocation);
+	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBeamLocation) const;
 
 	// Set bAiming to true or false with button press
 	void AimingButtonPressed();
@@ -65,25 +65,28 @@ protected:
 	void AutoFireReset();
 
 	// line trace for items under the crosshair
-	bool TraceUnderCrosshair(FHitResult& OutHitResult, FVector& OutHitLocation);
+	bool TraceUnderCrosshair(FHitResult& OutHitResult, FVector& OutHitLocation) const;
 
-	// Trace for items in vicibity is overlapped item count > 0
+	// Trace for items in visibity is overlapped item count > 0
 	void TraceForItems();
 
 	// Spawns a default weapon and equips it
-	class AWeapon* SpawnDefaultWeapon();
+	class AWeapon* SpawnDefaultWeapon() const;
 
 	// take a weapon and equips it
 	void EquipWeapon(class AWeapon* WeaponToEquip);
 
 	// drop the currently Equipped weapon
-	void DropWeapon();
+	void DropWeapon() const;
 
 	// Drop currently equipped weapon and equip WeaponToSwap
 	void SwapWeapon(class AWeapon* WeaponToSwap);
 
 	// initialize the AmmoMap with Ammo values
 	void InitializeAmmoMap();
+
+	// checks is weapon has ammo
+	bool WeaponHasAmmo() const;
 	
 
 public:	
@@ -314,7 +317,7 @@ public:
 	void FireWeapon();
 
 	//
-	FVector GetCameraInterpLocation();
+	FVector GetCameraInterpLocation() const;
 
 	void GetPickupItem(class AItem* Item);
 

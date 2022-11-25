@@ -279,7 +279,10 @@ void AShooterCharacter::LookupByMouse(float Value)
 }
 
 void AShooterCharacter::FireWeapon()
-{	
+{
+
+	if(EquippedWeapon == nullptr) return;
+	
 	// Play sound of gunfire
 	if(FireSound)
 	{
@@ -288,11 +291,11 @@ void AShooterCharacter::FireWeapon()
 
 
 	// show fire flashes on the barrel
-	const USkeletalMeshSocket* barrelSocket = GetMesh()->GetSocketByName("BarrelSocket");
+	const USkeletalMeshSocket* barrelSocket = EquippedWeapon->GetItemMesh()->GetSocketByName("BarrelSocket");
 	if(barrelSocket)
 	{	
 		// position of the muzzle barrel of the gun
-		const FTransform socketTransform = barrelSocket->GetSocketTransform(GetMesh());
+		const FTransform socketTransform = barrelSocket->GetSocketTransform(EquippedWeapon->GetItemMesh());
 
 		if(MuzzleFlash)
 		{
@@ -329,7 +332,13 @@ void AShooterCharacter::FireWeapon()
 		animInstance->Montage_JumpToSection(FName("StartFire"));
 	}
 
-	// start bullet fire time for cross hairs
+	// decrease ammo count
+	if(EquippedWeapon)
+	{
+		EquippedWeapon->DecrementAmmoCount();
+	}
+
+	// start bullet fire timer for cross hairs
 	StartCrosshairBulletFire();
 	
 }
@@ -338,7 +347,7 @@ void AShooterCharacter::FireWeapon()
 
 bool AShooterCharacter::GetBeamEndLocation(
 	const FVector& MuzzleSocketLocation,
-	FVector& OutBeamLocation)
+	FVector& OutBeamLocation) const 
 {
 	// Check for crosshair trace hit
 	FHitResult CrosshairHitResult;
@@ -518,7 +527,12 @@ void AShooterCharacter::FinishCrossHairBulletFire()
 void AShooterCharacter::FireButtonPressed()
 {
 	bFireButtonPressed = true;
-	StartFireTimer();
+	
+	if(WeaponHasAmmo())
+	{
+		StartFireTimer();
+	}
+	
 }
 
 void AShooterCharacter::FireButtonReleased()
@@ -559,16 +573,19 @@ void AShooterCharacter::StartFireTimer()
 
 void AShooterCharacter::AutoFireReset()
 {
-	bShouldFire = true;
-	if(bFireButtonPressed)
+	if (WeaponHasAmmo())
 	{
-		StartFireTimer();
+		bShouldFire = true;
+		if(bFireButtonPressed)
+		{
+			StartFireTimer();
+		}
 	}
 }
 
 bool AShooterCharacter::TraceUnderCrosshair(
 	FHitResult& OutHitResult, 
-	FVector& OutHitLocation)
+	FVector& OutHitLocation) const
 {
 	// Get Viewport Size
 	FVector2D ViewportSize;
@@ -623,7 +640,7 @@ void AShooterCharacter::IncrementOverlappedItemCount(int8 Amount)
 	}
 }
 
-AWeapon* AShooterCharacter::SpawnDefaultWeapon()
+AWeapon* AShooterCharacter::SpawnDefaultWeapon() const
 {
 	// check the TSubClassOf variable
 	if(DefaultWeaponClass)
@@ -654,7 +671,7 @@ void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
 	}
 }
 
-void AShooterCharacter::DropWeapon()
+void AShooterCharacter::DropWeapon() const 
 {
 	if(EquippedWeapon)
 	{
@@ -673,7 +690,7 @@ void AShooterCharacter::SwapWeapon(AWeapon* WeaponToSwap)
 	TracedHitItemLastFrame = nullptr;
 }
 
-FVector AShooterCharacter::GetCameraInterpLocation()
+FVector AShooterCharacter::GetCameraInterpLocation() const
 {
 	const FVector CameraLocation{FollowCamera->GetComponentLocation()};
 	const FVector CameraForward{FollowCamera->GetForwardVector()};
@@ -698,4 +715,11 @@ void AShooterCharacter::InitializeAmmoMap()
 {
 	AmmoMap.Add(EAmmoType::EAT_9MM, Starting9MMAmmo);
 	AmmoMap.Add(EAmmoType::EAT_AR, StartingARAmmo);
+}
+
+bool AShooterCharacter::WeaponHasAmmo() const
+{
+	if(EquippedWeapon == nullptr) return false;
+
+	return EquippedWeapon->GetAmmo() > 0;
 }
