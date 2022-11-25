@@ -66,7 +66,11 @@ OverlappedItemCount(0),
 
 // camera interp location variables
 CameraInterpDistance(250.f),
-CameraInterpElevation(65.f)
+CameraInterpElevation(65.f),
+
+// starting ammo amount
+Starting9MMAmmo(850),
+StartingARAmmo(120)
 
 	
 {
@@ -125,6 +129,8 @@ void AShooterCharacter::BeginPlay()
 
 	// Spawn the default weapon attach this to the mesh
 	EquipWeapon(SpawnDefaultWeapon());
+	
+	InitializeAmmoMap();
 	
 }
 
@@ -686,4 +692,10 @@ void AShooterCharacter::GetPickupItem(AItem* Item)
 	{
 		SwapWeapon(Weapon);
 	}
+}
+
+void AShooterCharacter::InitializeAmmoMap()
+{
+	AmmoMap.Add(EAmmoType::EAT_9MM, Starting9MMAmmo);
+	AmmoMap.Add(EAmmoType::EAT_AR, StartingARAmmo);
 }
