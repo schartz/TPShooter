@@ -7,7 +7,11 @@ AWeapon::AWeapon():
 
 ThrowWeaponTime(0.7f),
 bFalling(false),
-Ammo(0)
+Ammo(30),
+MagazineCapacity(30),
+WeaponType(EWeaponType::EWT_SMG),
+AmmoType(EAmmoType::EAT_9MM),
+ReloadMontageSection(FName(TEXT("Reload SMG")))
 
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -60,4 +64,10 @@ void AWeapon::DecrementAmmoCount()
 	{
 		--Ammo;
 	}
+}
+
+void AWeapon::ReloadAmmo(int32 Amount)
+{
+	checkf(Ammo + Amount <= MagazineCapacity, TEXT("Attempted to reload with more than magazine capacity"));
+	Ammo += Amount;
 }

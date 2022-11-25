@@ -69,7 +69,7 @@ AShooterCharacter::AShooterCharacter() :
 	CameraInterpElevation(65.f),
 
 	// starting ammo amount
-	Starting9MMAmmo(850),
+	Starting9MMAmmo(50),
 	StartingARAmmo(120),
 
 	// combat variables
@@ -578,6 +578,7 @@ void AShooterCharacter::TakeActionButtonReleased()
 
 void AShooterCharacter::ReloadButtonPressed()
 {
+	if(EquippedWeapon == nullptr) return;
 	ReloadWeapon();
 }
 
@@ -586,28 +587,48 @@ void AShooterCharacter::ReloadWeapon()
 	if(CombatState != ECombatState::ECS_UNOCCUPIED) return;
 
 	// do we have ammo of the correct type
-	// TODO: replace following true with a function to check to see if we have the ammo of correct type
-
-	if(true)
+	if(CarryingAmmo())
 	{
-		// TODO: create an Enum for weapon type
-		// TODO: switch on EquippedWeapon->WeaponType
-		// TODO: select appropriate reload montage section
-		FName MontageSection(TEXT("Reload SMG"));
+		CombatState = ECombatState::ECS_RELOADING;
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if(ReloadMontage && AnimInstance)
 		{
 			AnimInstance->Montage_Play(ReloadMontage);
-			
-			AnimInstance->Montage_JumpToSection(MontageSection);
+			AnimInstance->Montage_JumpToSection(EquippedWeapon->GetReloadMontageSection());
 		}
 	}
 }
 
 void AShooterCharacter::FinishReloading()
 {
-	//TODO: update ammo map
 	CombatState = ECombatState::ECS_UNOCCUPIED;
+
+	if (EquippedWeapon == nullptr) return;
+	
+	const auto AmmoType = EquippedWeapon->GetAmmoType();
+	if(AmmoMap.Contains(AmmoType))
+	{
+		// amount of ammo which the character is carrying of the equipped weapon type
+		int32 CarriedAmmo = AmmoMap[AmmoType];
+
+		// space left in the magazine of equipped weapon
+		const int32 MagEmptySpace = EquippedWeapon->GetMagazineCapacity() - EquippedWeapon->GetAmmo();
+		if(MagEmptySpace > CarriedAmmo)
+		{
+			// fill the magazine with all the ammo character is carrying
+			EquippedWeapon->ReloadAmmo(CarriedAmmo);
+			CarriedAmmo = 0;
+		}
+		else
+		{
+			// reload the magazine
+			EquippedWeapon->ReloadAmmo(MagEmptySpace);
+			CarriedAmmo -= MagEmptySpace;
+		}
+
+		AmmoMap.Add(AmmoType, CarriedAmmo);
+		
+	}
 }
 
 void AShooterCharacter::StartFireTimer()
@@ -773,4 +794,17 @@ bool AShooterCharacter::WeaponHasAmmo() const
 	if (EquippedWeapon == nullptr) return false;
 
 	return EquippedWeapon->GetAmmo() > 0;
+}
+
+bool AShooterCharacter::CarryingAmmo()
+{
+	if(EquippedWeapon == nullptr) return false;
+	auto AmmoType = EquippedWeapon->GetAmmoType();
+
+	if(AmmoMap.Contains(AmmoType))
+	{
+		return AmmoMap[AmmoType] > 0;
+	}
+	return false;
+	
 }

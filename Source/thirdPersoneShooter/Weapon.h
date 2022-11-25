@@ -4,13 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "Item.h"
+#include "AmmoType.h"
 #include "Weapon.generated.h"
 
 /**
  * 
  */
 
-
+UENUM(BlueprintType)
+enum class EWeaponType: uint8
+{
+	EWT_SMG UMETA(DisplayName = "Sub Machine Gun"),
+	EWT_AR UMETA(DisplayName = "Assault Rifle"),
+	EWT_MAX UMETA(DisplayName = "DefaultMax"),
+};
 
 UCLASS()
 class THIRDPERSONESHOOTER_API AWeapon : public AItem
@@ -32,14 +39,32 @@ private:
 	// Amm count for this weapon
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=WeaponProperties, meta=(AllowPrivateAccess="true"))
 	int32 Ammo;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=WeaponProperties, meta=(AllowPrivateAccess="true"))
+	int32 MagazineCapacity;
+
+	// type of weapon and ammo
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=WeaponProperties, meta=(AllowPrivateAccess="true"))
+	EWeaponType WeaponType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=WeaponProperties, meta=(AllowPrivateAccess="true"))
+	EAmmoType AmmoType;
+
+	// name of reload animation section in ReloadAnimationMontage
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=WeaponProperties, meta=(AllowPrivateAccess="true"))
+	FName ReloadMontageSection;
 	
 	
 public:
 	// throws the weapon with an impulse
 	void ThrowWeapon();
+	
 	FORCEINLINE int32 GetAmmo() const {return Ammo;};
+	FORCEINLINE int32 GetMagazineCapacity() const {return MagazineCapacity;};
+	FORCEINLINE EWeaponType GetWeaponType() const {return WeaponType;};
+	FORCEINLINE EAmmoType GetAmmoType() const {return AmmoType;};
+	FORCEINLINE FName GetReloadMontageSection() const {return ReloadMontageSection;};
 
 	// called from character class when firing weapon
 	void DecrementAmmoCount();
+	void ReloadAmmo(int32 AMount);
 	
 };

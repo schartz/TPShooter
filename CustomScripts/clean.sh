@@ -1,5 +1,5 @@
 #!/bin/bash
-
+cd ..
 rm -rf ./.vs
 rm -rf ./.vscode
 rm -rf ./Binaries
