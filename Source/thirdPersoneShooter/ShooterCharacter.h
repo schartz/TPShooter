@@ -13,6 +13,15 @@ enum class EAmmoType: uint8 {
     EAT_MAX UMETA(DisplayName = "DefaultMax")
 };
 
+UENUM(BlueprintType)
+enum class ECombatState: uint8
+{
+	ECS_UNOCCUPIED UMETA(DisplayName = "Unoccupied"),	
+	ECS_FIRE_TIMER_IN_PROGRESS UMETA(DisplayName = "FireTimerInProgress"),	
+	ECS_RELOADING UMETA(DisplayName = "Reloading"),	
+	ECS_MAX UMETA(DisplayName = "DisplayMax"),	
+};
+
 UCLASS()
 class THIRDPERSONESHOOTER_API AShooterCharacter : public ACharacter
 {
@@ -87,6 +96,10 @@ protected:
 
 	// checks is weapon has ammo
 	bool WeaponHasAmmo() const;
+
+	void PlayFireSound() const;
+	void SendBullet() const;
+	void PlayFireWeaponAnimation() const;
 	
 
 public:	
@@ -273,6 +286,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Items, meta=(AllowPrivateAccess="true"))
 	int32 StartingARAmmo;
 
+	// combat state can only fire and reload if unoccupied
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Combat, meta=(AllowPrivateAccess="true"))
+	ECombatState CombatState;
 
 public:
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const {return CameraBoom;}
