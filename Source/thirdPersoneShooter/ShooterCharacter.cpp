@@ -200,6 +200,8 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("TakeActionButton", IE_Pressed, this, &AShooterCharacter::TakeActionButtonPressed);
 	PlayerInputComponent->BindAction("TakeActionButton", IE_Released, this,
 	                                 &AShooterCharacter::TakeActionButtonReleased);
+
+	PlayerInputComponent->BindAction("ReloadButton", IE_Pressed, this, &AShooterCharacter::ReloadButtonPressed);
 }
 
 
@@ -574,6 +576,40 @@ void AShooterCharacter::TakeActionButtonReleased()
 {
 }
 
+void AShooterCharacter::ReloadButtonPressed()
+{
+	ReloadWeapon();
+}
+
+void AShooterCharacter::ReloadWeapon()
+{
+	if(CombatState != ECombatState::ECS_UNOCCUPIED) return;
+
+	// do we have ammo of the correct type
+	// TODO: replace following true with a function to check to see if we have the ammo of correct type
+
+	if(true)
+	{
+		// TODO: create an Enum for weapon type
+		// TODO: switch on EquippedWeapon->WeaponType
+		// TODO: select appropriate reload montage section
+		FName MontageSection(TEXT("Reload SMG"));
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if(ReloadMontage && AnimInstance)
+		{
+			AnimInstance->Montage_Play(ReloadMontage);
+			
+			AnimInstance->Montage_JumpToSection(MontageSection);
+		}
+	}
+}
+
+void AShooterCharacter::FinishReloading()
+{
+	//TODO: update ammo map
+	CombatState = ECombatState::ECS_UNOCCUPIED;
+}
+
 void AShooterCharacter::StartFireTimer()
 {
 	CombatState = ECombatState::ECS_FIRE_TIMER_IN_PROGRESS;
@@ -593,6 +629,7 @@ void AShooterCharacter::AutoFireReset()
 	} else
 	{
 		// reload weapon
+		ReloadWeapon();
 	}
 }
 
