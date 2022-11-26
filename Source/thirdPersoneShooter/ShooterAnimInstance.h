@@ -10,6 +10,19 @@
 /**
  * 
  */
+
+UENUM(BlueprintType)
+enum class EOffsetState: uint8
+{
+	EOS_AIMING UMETA(DisplayName = "Aiming"),
+	EOS_HIP UMETA(DisplayName = "Hip"),
+	EOS_RELOADING UMETA(DisplayName = "Reloading"),
+	EOS_IN_AIR UMETA(DisplayName = "InAIr"),
+	
+	EOS_MAX UMETA(DisplayName = "DefaultMax")
+};
+
+
 UCLASS()
 class THIRDPERSONESHOOTER_API UShooterAnimInstance : public UAnimInstance
 {
@@ -71,6 +84,10 @@ private:
 	// true when reloading, used to stop aim offset while reloading
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=TurnInPlace, meta=(AllowPrivateAccess = "true"))
 	bool bReloading;
+
+	// offset state used to determine which offset state to use
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=TurnInPlace, meta=(AllowPrivateAccess = "true"))
+	EOffsetState OffsetState;
 	
 
 public:
