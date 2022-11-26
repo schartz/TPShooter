@@ -210,7 +210,7 @@ void AItem::SetItemProperties(EItemState State)
 
 		CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 		CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
+		break;
 	case EItemState::EIS_EquipInterping:
 		PickupWidget->SetVisibility(false);
 

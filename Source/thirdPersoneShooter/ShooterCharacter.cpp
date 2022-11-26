@@ -10,6 +10,7 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "DrawDebugHelpers.h"
 #include "Item.h"
+#include "SWarningOrErrorBox.h"
 #include "Weapon.h"
 #include "Components/WidgetComponent.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -108,6 +109,9 @@ AShooterCharacter::AShooterCharacter() :
 	// configure in air speed and control over movement extent
 	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->AirControl = 0.2f;
+
+	// create HandSceneComponent
+	HandSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("HandSceneComp"));
 }
 
 // Called when the game starts or when spawned
@@ -743,7 +747,7 @@ void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
 	}
 }
 
-void AShooterCharacter::DropWeapon() const
+void AShooterCharacter::DropWeapon()
 {
 	if (EquippedWeapon)
 	{
@@ -807,4 +811,27 @@ bool AShooterCharacter::CarryingAmmo()
 	}
 	return false;
 	
+}
+
+void AShooterCharacter::GrabClip()
+{
+	if(EquippedWeapon == nullptr || HandSceneComponent == nullptr) return;
+
+	// index for the clip bone on the equipped weapon
+	const int32 ClipBoneIndex = EquippedWeapon->GetItemMesh()->GetBoneIndex(EquippedWeapon->GetClipBoneName());
+
+	// store the transform of the clip
+	FTransform ClipTransform = EquippedWeapon->GetItemMesh()->GetBoneTransform(ClipBoneIndex);
+
+	FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, true);
+	HandSceneComponent->AttachToComponent(GetMesh(), AttachmentRules, FName(TEXT("hand_l")));
+	
+	HandSceneComponent->SetWorldTransform(ClipTransform);
+	EquippedWeapon->SetMovingClip(true);
+	
+}
+
+void AShooterCharacter::ReleaseClip()
+{
+	EquippedWeapon->SetMovingClip(false);
 }

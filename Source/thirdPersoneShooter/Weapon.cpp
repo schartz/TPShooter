@@ -11,7 +11,8 @@ Ammo(30),
 MagazineCapacity(30),
 WeaponType(EWeaponType::EWT_SMG),
 AmmoType(EAmmoType::EAT_9MM),
-ReloadMontageSection(FName(TEXT("Reload SMG")))
+ReloadMontageSection(FName(TEXT("Reload SMG"))),
+ClipBoneName(FName(TEXT("smg_clip")))
 
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -41,7 +42,7 @@ void AWeapon::ThrowWeapon()
 	FVector ImpulseDirection = MeshRight.RotateAngleAxis(-20.f, MeshForward);
 	const float RandomRotation{FMath::FRandRange(10.f, 30.f)};
 	ImpulseDirection = ImpulseDirection.RotateAngleAxis(RandomRotation, FVector(0.f, 0.f, 1.f));
-	ImpulseDirection *= 6000.f;
+	ImpulseDirection *= 10000.f;
 	GetItemMesh()->AddImpulse(ImpulseDirection);
 
 	bFalling = true;

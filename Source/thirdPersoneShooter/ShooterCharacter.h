@@ -81,7 +81,7 @@ protected:
 	void EquipWeapon(class AWeapon* WeaponToEquip);
 
 	// drop the currently Equipped weapon
-	void DropWeapon() const;
+	void DropWeapon();
 
 	// Drop currently equipped weapon and equip WeaponToSwap
 	void SwapWeapon(class AWeapon* WeaponToSwap);
@@ -105,6 +105,14 @@ protected:
 
 	// checks to see if we have ammo for the equipped weapon type
 	bool CarryingAmmo();
+
+	// called from animation blueprint with grabClip notifier
+	UFUNCTION(BlueprintCallable)
+	void GrabClip();
+
+	// called from animation blueprint with releaseClip notifier
+	UFUNCTION(BlueprintCallable)
+	void ReleaseClip();
 	
 
 public:	
@@ -298,6 +306,14 @@ private:
 	// montage for reload animations
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Combat, meta=(AllowPrivateAccess="true"))
 	class UAnimMontage* ReloadMontage;
+
+	// transform of the clip when we first grab the clip during reloading
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Combat, meta=(AllowPrivateAccess="true"))
+	FTransform CLipTransform;
+
+	// scene component to be attached to the character's hand during reloading
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Combat, meta=(AllowPrivateAccess="true"))
+	class USceneComponent* HandSceneComponent;
 
 public:
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const {return CameraBoom;}

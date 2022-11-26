@@ -51,6 +51,14 @@ private:
 	// name of reload animation section in ReloadAnimationMontage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=WeaponProperties, meta=(AllowPrivateAccess="true"))
 	FName ReloadMontageSection;
+
+	// true when moving the clip while reloading
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=WeaponProperties, meta=(AllowPrivateAccess="true"))
+	bool bMovingClip;
+
+	// name of gun reload clip bone
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=WeaponProperties, meta=(AllowPrivateAccess="true"))
+	FName ClipBoneName;
 	
 	
 public:
@@ -62,6 +70,8 @@ public:
 	FORCEINLINE EWeaponType GetWeaponType() const {return WeaponType;};
 	FORCEINLINE EAmmoType GetAmmoType() const {return AmmoType;};
 	FORCEINLINE FName GetReloadMontageSection() const {return ReloadMontageSection;};
+	FORCEINLINE FName GetClipBoneName() const {return ClipBoneName;};
+	FORCEINLINE void SetMovingClip(bool Move){bMovingClip = Move;};
 
 	// called from character class when firing weapon
 	void DecrementAmmoCount();
