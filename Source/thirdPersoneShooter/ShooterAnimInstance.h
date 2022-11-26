@@ -14,6 +14,13 @@ class THIRDPERSONESHOOTER_API UShooterAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 
+public:
+	UShooterAnimInstance();
+	
+protected:
+	// handle turning in place variables
+	void TurnInPlace();
+	
 private:
 
 	// reference to the Character who is using this animation instance
@@ -41,6 +48,21 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess = "true"))
 	bool bAiming;
 
+	// yaw of the character this frame;
+	float CharacterYaw;
+
+	// yaw of the character previous frame
+	float CharacterYawLastFrame;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=TurnInPlace, meta=(AllowPrivateAccess = "true"))
+	float RootBoneYawOffset;
+
+	// rotation curve value this frame
+	float RotationCurve;
+
+	// rotation curve value last frame
+	float RotationCurveLastFrame;
+
 public:
 
 	// this function is like beginPlay but for animations
@@ -49,7 +71,7 @@ public:
 	// this function will act like tick function
 	// called every frame
 	UFUNCTION(BlueprintCallable)
-	void UpdateAnimationProperties(float deltaTime);
+	void UpdateAnimationProperties(float DeltaTime);
 
 	
 };
