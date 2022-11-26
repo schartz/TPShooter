@@ -565,14 +565,14 @@ void AShooterCharacter::TakeActionButtonPressed()
 {
 	if (TracedHitItem)
 	{
+		// start the item interpolation curve for pickup
 		TracedHitItem->StartItemCurve(this);
 
-		/*AWeapon* TracedHitWeapon = Cast<AWeapon>(TracedHitItem);
-	
-		if(TracedHitWeapon)
+		// play the item pickup sound
+		if(TracedHitItem->GetPickupSound())
 		{
-			SwapWeapon(TracedHitWeapon);
-		}*/
+			UGameplayStatics::PlaySound2D(this, TracedHitItem->GetPickupSound());
+		}
 	}
 }
 
@@ -779,6 +779,10 @@ FVector AShooterCharacter::GetCameraInterpLocation() const
 
 void AShooterCharacter::GetPickupItem(AItem* Item)
 {
+	if(Item->GetEquipSound())
+	{
+		UGameplayStatics::PlaySound2D(this, Item->GetEquipSound());
+	}
 	auto Weapon = Cast<AWeapon>(Item);
 
 	if (Weapon)
