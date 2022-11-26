@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ShooterCharacter.h"
 #include "Animation/AnimInstance.h"
 #include "ShooterAnimInstance.generated.h"
 
@@ -62,6 +63,15 @@ private:
 
 	// rotation curve value last frame
 	float RotationCurveLastFrame;
+
+	// the pitch of the aim rotation used for aim offset
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=TurnInPlace, meta=(AllowPrivateAccess = "true"))
+	float Pitch;
+
+	// true when reloading, used to stop aim offset while reloading
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=TurnInPlace, meta=(AllowPrivateAccess = "true"))
+	bool bReloading;
+	
 
 public:
 

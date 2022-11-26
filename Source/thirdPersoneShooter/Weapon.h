@@ -76,5 +76,6 @@ public:
 	// called from character class when firing weapon
 	void DecrementAmmoCount();
 	void ReloadAmmo(int32 AMount);
+	bool ClipIsFull();
 	
 };

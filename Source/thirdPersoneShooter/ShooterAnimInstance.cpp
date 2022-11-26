@@ -18,7 +18,9 @@ CharacterYaw(0.f),
 CharacterYawLastFrame(0.f),
 RootBoneYawOffset(0.f),
 RotationCurve(0.f),
-RotationCurveLastFrame(0.f)
+RotationCurveLastFrame(0.f),
+Pitch(0.f),
+bReloading(false)
 {
 }
 
@@ -38,6 +40,8 @@ void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 
 	if (ShooterCharacter)
 	{
+		bReloading = ShooterCharacter->GetCombatState() == ECombatState::ECS_RELOADING;
+		
 		// get leteral speed of the character from its velocity
 		FVector velocity = ShooterCharacter->GetVelocity();
 		velocity.Z = 0;
@@ -62,16 +66,6 @@ void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 
 		// is the character aiming?
 		bAiming = ShooterCharacter->GetAiming();
-
-		/*
-		FString RotationMessage = FString::Printf(TEXT("Base Aim Rotation: %f"), AimRotation.Yaw);
-		FString MovementRotationMessage = FString::Printf(TEXT("Movement Rotation: %f"), MovementRotation.Yaw);
-		
-		FString OffsetYawMessage = FString::Printf(TEXT("Offset Yaw: %f"), MovementOffsetYaw);
-		if (GEngine)
-		{
-		    GEngine->AddOnScreenDebugMessage(1, 0.f, FColor::Green, OffsetYawMessage);
-		}*/
 	}
 
 	TurnInPlace();
@@ -80,6 +74,10 @@ void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 void UShooterAnimInstance::TurnInPlace()
 {
 	if (ShooterCharacter == nullptr) return;
+
+	// set the pitch
+	Pitch = ShooterCharacter->GetBaseAimRotation().Pitch;
+	
 	if (Speed > 0)
 	{
 		// Don't want to turn in place; Character is moving
