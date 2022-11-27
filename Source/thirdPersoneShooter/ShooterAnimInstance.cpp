@@ -25,7 +25,9 @@ OffsetState(EOffsetState::EOS_HIP),
 CharacterRotation(FRotator(0.f)),
 CharacterRotationLastFrame(FRotator(0.f)),
 YawDelta(0.f),
-bCrouching(false)
+bCrouching(false),
+WeaponRecoilWeight(1.f),
+bTurningInPlace(false)
 {
 }
 
@@ -121,6 +123,7 @@ void UShooterAnimInstance::TurnInPlace()
 		const float Turning{ GetCurveValue(TEXT("Turning")) };
 		if (Turning > 0)
 		{
+			bTurningInPlace = true;
 			RotationCurveLastFrame = RotationCurve;
 			RotationCurve = GetCurveValue(TEXT("Rotation"));
 			const float DeltaRotation{ RotationCurve - RotationCurveLastFrame };
@@ -136,9 +139,53 @@ void UShooterAnimInstance::TurnInPlace()
 				RootBoneYawOffset > 0 ? RootBoneYawOffset -= YawExcess : RootBoneYawOffset += YawExcess;
 			}
 		}
+		else
+		{
+			bTurningInPlace = false;
+		}
+
+		
 
 		//if (GEngine) GEngine->AddOnScreenDebugMessage(1, -1, FColor::Cyan, FString::Printf(TEXT("RootBoneYawOffset: %f"), RootBoneYawOffset));
 	}
+
+	if(bTurningInPlace)
+	{
+		if (bReloading)
+		{
+			WeaponRecoilWeight = 1.f;
+		}
+		else
+		{
+			WeaponRecoilWeight = 0.f;
+		}
+			
+	}
+	else // not turning in place
+		{
+		if(bCrouching)
+		{
+			if (bReloading)
+			{
+				WeaponRecoilWeight = 1.f;
+			}
+			else
+			{
+				WeaponRecoilWeight = 0.1f;
+			}
+		}
+		else
+		{
+			if(bAiming || bReloading)
+			{
+				WeaponRecoilWeight = 1.f;
+			}
+			else
+			{
+				WeaponRecoilWeight = 0.5f;
+			}
+		}
+		}
 }
 
 void UShooterAnimInstance::LeanInDirection(float DeltaTime)

@@ -115,6 +115,8 @@ protected:
 	void ReleaseClip();
 
 	void CrouchButtonPressed();
+
+	virtual void Jump() override;
 	
 
 public:	
@@ -320,6 +322,17 @@ private:
 	// true when crouching
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
 	bool bCrouching;
+
+	// normal movement speed
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
+	float BaseMovementSpeed;
+
+	// movement speed while crouching
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
+	float CrouchMovementSpeed;
+
+	
+	
 
 public:
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const {return CameraBoom;}

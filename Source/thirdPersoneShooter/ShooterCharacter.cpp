@@ -75,7 +75,10 @@ AShooterCharacter::AShooterCharacter() :
 
 	// combat variables
 	CombatState(ECombatState::ECS_UNOCCUPIED),
-	bCrouching(false)
+	bCrouching(false),
+
+	BaseMovementSpeed(650.f),
+	CrouchMovementSpeed(300.f)
 
 
 {
@@ -137,6 +140,9 @@ void AShooterCharacter::BeginPlay()
 	EquipWeapon(SpawnDefaultWeapon());
 
 	InitializeAmmoMap();
+
+	// set character walk speed
+	GetCharacterMovement()->MaxWalkSpeed = BaseMovementSpeed;
 }
 
 // Called every frame
@@ -193,7 +199,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("TurnByMouse", this, &AShooterCharacter::TurnByMouse);
 	PlayerInputComponent->BindAxis("LookupByMouse", this, &AShooterCharacter::LookupByMouse);
 
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AShooterCharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	PlayerInputComponent->BindAction("FireButton", IE_Pressed, this, &AShooterCharacter::FireButtonPressed);
@@ -840,8 +846,31 @@ void AShooterCharacter::ReleaseClip()
 
 void AShooterCharacter::CrouchButtonPressed()
 {
-	if(!GetCharacterMovement()->IsFalling())
+	if (!GetCharacterMovement()->IsFalling())
 	{
 		bCrouching = !bCrouching;
 	}
+
+	if(bCrouching)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = CrouchMovementSpeed;
+	} else
+	{
+		GetCharacterMovement()->MaxWalkSpeed = BaseMovementSpeed;
+	}
+}
+
+void AShooterCharacter::Jump()
+{
+	if(bCrouching)
+	{
+		bCrouching = false;
+		GetCharacterMovement()->MaxWalkSpeed = BaseMovementSpeed;
+		
+	} else
+	{
+		ACharacter::Jump();		
+	}
+
+	//ACharacter::Jump();		
 }
