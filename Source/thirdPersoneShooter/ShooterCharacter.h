@@ -121,6 +121,9 @@ protected:
 
 	// interps capsule half height when crouching/standing
 	void InterpCapsuleHalfHeight(float DeltaTime);
+
+	void StartAiming();
+	void StopAiming();
 	
 
 public:	
@@ -215,9 +218,11 @@ private:
 
 	// default camera field of view value
 	// higher FOV more you see!
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Camera, meta=(AllowPrivateAccess = "true"))
 	float CameraDefaultFOV;
 
 	// camera field of view value when zoomed in
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Camera, meta=(AllowPrivateAccess = "true"))
 	float CameraZoomedFOV;
 
 	// camera field of view this frame
@@ -351,6 +356,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Movement, meta=(AllowPrivateAccess="true"))
 	float CrouchingGroundFriction;
+
+	// true when aiming button is pressed
+	bool bAimingButtonPressed;
 	
 	
 

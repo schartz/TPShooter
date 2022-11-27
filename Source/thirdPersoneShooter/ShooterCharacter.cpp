@@ -31,15 +31,15 @@ AShooterCharacter::AShooterCharacter() :
 	// mouse look sensitivity scale factors
 	MouseHipTurnRate(1.f),
 	MouseHipLookupRate(1.f),
-	MouseAimingTurnRate(0.5f),
-	MouseAimingLookupRate(0.5f),
+	MouseAimingTurnRate(0.6f),
+	MouseAimingLookupRate(0.6f),
 
 	// true when aiming the weapon
 	bAiming(false),
 
 	// camera field of view values
 	CameraDefaultFOV(0.f), // we're setting this in `BeginPlay` function
-	CameraZoomedFOV(38.f),
+	CameraZoomedFOV(30.f),
 	CameraCurrentFOV(0.f),
 	ZoomInterpSpeed(20.f),
 
@@ -84,7 +84,8 @@ AShooterCharacter::AShooterCharacter() :
 	StandingCapsuleHalfHeight(88.f),
 	CrouchingCapsuleHalfHeight(44.f),
 	BaseGroundFriction(2.f),
-	CrouchingGroundFriction(100.f)
+	CrouchingGroundFriction(100.f),
+	bAimingButtonPressed(false)
 
 
 {
@@ -97,7 +98,7 @@ AShooterCharacter::AShooterCharacter() :
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 180.f;
 	CameraBoom->bUsePawnControlRotation = true;
-	CameraBoom->SocketOffset = FVector(0.f, 50.f, 45.f);
+	CameraBoom->SocketOffset = FVector(0.f, 50.f, 70.f);
 
 	// create a camera
 	// attach it to the end of spring arm connected to that character
@@ -426,12 +427,17 @@ bool AShooterCharacter::GetBeamEndLocation(
 
 void AShooterCharacter::AimingButtonPressed()
 {
-	bAiming = true;
+	bAimingButtonPressed = true;
+	if(CombatState != ECombatState::ECS_RELOADING)
+	{
+		StartAiming();
+	}
 }
 
 void AShooterCharacter::AimingButtonReleased()
 {
-	bAiming = false;
+	bAimingButtonPressed = false;
+	StopAiming();
 }
 
 void AShooterCharacter::UpdateTurnAndLookupRates()
@@ -608,6 +614,13 @@ void AShooterCharacter::ReloadWeapon()
 	// do we have ammo of the correct type
 	if (CarryingAmmo() && !EquippedWeapon->ClipIsFull())
 	{
+
+		// stop aiming before reloading the weapon
+		if(bAiming)
+		{
+			StopAiming();
+		}
+		
 		CombatState = ECombatState::ECS_RELOADING;
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (ReloadMontage && AnimInstance)
@@ -621,6 +634,12 @@ void AShooterCharacter::ReloadWeapon()
 void AShooterCharacter::FinishReloading()
 {
 	CombatState = ECombatState::ECS_UNOCCUPIED;
+
+	// aiming button was pressed while reloading, Now is the time to aim
+	if(bAimingButtonPressed)
+	{
+		StartAiming();
+	}
 
 	if (EquippedWeapon == nullptr) return;
 
@@ -912,4 +931,19 @@ void AShooterCharacter::InterpCapsuleHalfHeight(float DeltaTime)
 	GetMesh()->AddLocalOffset(MeshOffset);
 
 	GetCapsuleComponent()->SetCapsuleHalfHeight(HalfHeight);
+}
+
+void AShooterCharacter::StartAiming()
+{
+	bAiming = true;
+	GetCharacterMovement()->MaxWalkSpeed = CrouchMovementSpeed;
+}
+
+void AShooterCharacter::StopAiming()
+{
+	bAiming = false;
+	if (!bCrouching)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = BaseMovementSpeed;
+	}
 }
