@@ -12,6 +12,7 @@
 #include "Item.h"
 #include "SWarningOrErrorBox.h"
 #include "Weapon.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 
@@ -78,7 +79,12 @@ AShooterCharacter::AShooterCharacter() :
 	bCrouching(false),
 
 	BaseMovementSpeed(650.f),
-	CrouchMovementSpeed(300.f)
+	CrouchMovementSpeed(300.f),
+	CurrentCapsuleHalfHeight(88.f),
+	StandingCapsuleHalfHeight(88.f),
+	CrouchingCapsuleHalfHeight(44.f),
+	BaseGroundFriction(2.f),
+	CrouchingGroundFriction(100.f)
 
 
 {
@@ -91,7 +97,7 @@ AShooterCharacter::AShooterCharacter() :
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 180.f;
 	CameraBoom->bUsePawnControlRotation = true;
-	CameraBoom->SocketOffset = FVector(0.f, 50.f, 80.f);
+	CameraBoom->SocketOffset = FVector(0.f, 50.f, 45.f);
 
 	// create a camera
 	// attach it to the end of spring arm connected to that character
@@ -160,6 +166,9 @@ void AShooterCharacter::Tick(float DeltaTime)
 
 	// check OverlappedItemCount then trace for items
 	TraceForItems();
+
+	// interpolate the capsule half height based on crouching/standing
+	InterpCapsuleHalfHeight(DeltaTime);
 }
 
 void AShooterCharacter::UpdateCameraFieldOfView(float DeltaTime)
@@ -851,26 +860,56 @@ void AShooterCharacter::CrouchButtonPressed()
 		bCrouching = !bCrouching;
 	}
 
-	if(bCrouching)
+	if (bCrouching)
 	{
 		GetCharacterMovement()->MaxWalkSpeed = CrouchMovementSpeed;
-	} else
+		GetCharacterMovement()->GroundFriction = CrouchingGroundFriction;
+	}
+	else
 	{
 		GetCharacterMovement()->MaxWalkSpeed = BaseMovementSpeed;
+		GetCharacterMovement()->GroundFriction = BaseGroundFriction;
 	}
 }
 
 void AShooterCharacter::Jump()
 {
-	if(bCrouching)
+	if (bCrouching)
 	{
 		bCrouching = false;
 		GetCharacterMovement()->MaxWalkSpeed = BaseMovementSpeed;
-		
-	} else
+	}
+	else
 	{
-		ACharacter::Jump();		
+		ACharacter::Jump();
 	}
 
 	//ACharacter::Jump();		
+}
+
+void AShooterCharacter::InterpCapsuleHalfHeight(float DeltaTime)
+{
+	float TargetCapsuleHalfHeight{};
+	if (bCrouching)
+	{
+		TargetCapsuleHalfHeight = CrouchingCapsuleHalfHeight;
+	}
+	else
+	{
+		TargetCapsuleHalfHeight = StandingCapsuleHalfHeight;
+	}
+
+	const float HalfHeight{
+		FMath::FInterpTo(GetCapsuleComponent()->GetScaledCapsuleHalfHeight(), TargetCapsuleHalfHeight, DeltaTime, 20.f)
+	};
+
+	// DeltaCapsuleHalfHeight is -ve if crouching, +ve if standing
+	const float DeltaCapsuleHalfHeight = HalfHeight - GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+
+	// we need to put character mesh UP while couching and DOWN while standing
+	const FVector MeshOffset{0.f, 0.f, -DeltaCapsuleHalfHeight};
+
+	GetMesh()->AddLocalOffset(MeshOffset);
+
+	GetCapsuleComponent()->SetCapsuleHalfHeight(HalfHeight);
 }

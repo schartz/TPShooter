@@ -116,7 +116,11 @@ protected:
 
 	void CrouchButtonPressed();
 
+	// function to handle jump button pressed
 	virtual void Jump() override;
+
+	// interps capsule half height when crouching/standing
+	void InterpCapsuleHalfHeight(float DeltaTime);
 	
 
 public:	
@@ -331,6 +335,22 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
 	float CrouchMovementSpeed;
 
+	// half heights of the collision capsule half heights
+	float CurrentCapsuleHalfHeight;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Movement, meta=(AllowPrivateAccess="true"))
+	float StandingCapsuleHalfHeight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Movement, meta=(AllowPrivateAccess="true"))
+	float CrouchingCapsuleHalfHeight;
+
+	
+	// friction variables for crouching and standing states
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Movement, meta=(AllowPrivateAccess="true"))
+	float BaseGroundFriction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Movement, meta=(AllowPrivateAccess="true"))
+	float CrouchingGroundFriction;
 	
 	
 
