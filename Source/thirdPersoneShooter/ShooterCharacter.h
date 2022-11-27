@@ -113,6 +113,8 @@ protected:
 	// called from animation blueprint with releaseClip notifier
 	UFUNCTION(BlueprintCallable)
 	void ReleaseClip();
+
+	void CrouchButtonPressed();
 	
 
 public:	
@@ -315,12 +317,17 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Combat, meta=(AllowPrivateAccess="true"))
 	class USceneComponent* HandSceneComponent;
 
+	// true when crouching
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Movement, meta=(AllowPrivateAccess="true"))
+	bool bCrouching;
+
 public:
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const {return CameraBoom;}
 	FORCEINLINE UCameraComponent* GetFollowCamera() const {return FollowCamera;}
 	FORCEINLINE bool GetAiming() const {return bAiming;}
 	FORCEINLINE int8 GetOverlappedItemCount() const {return OverlappedItemCount;}
 	FORCEINLINE ECombatState GetCombatState() const {return CombatState;}
+	FORCEINLINE bool GetCrouching() const {return bCrouching;}
 
 	/**
 	 * Adds or subtracts to and from OverlappedItemCount.

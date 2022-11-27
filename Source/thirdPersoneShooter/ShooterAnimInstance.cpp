@@ -24,7 +24,8 @@ bReloading(false),
 OffsetState(EOffsetState::EOS_HIP),
 CharacterRotation(FRotator(0.f)),
 CharacterRotationLastFrame(FRotator(0.f)),
-YawDelta(0.f)
+YawDelta(0.f),
+bCrouching(false)
 {
 }
 
@@ -45,6 +46,7 @@ void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 	if (ShooterCharacter)
 	{
 		bReloading = ShooterCharacter->GetCombatState() == ECombatState::ECS_RELOADING;
+		bCrouching = ShooterCharacter->GetCrouching();
 		
 		// get leteral speed of the character from its velocity
 		FVector velocity = ShooterCharacter->GetVelocity();
@@ -135,7 +137,7 @@ void UShooterAnimInstance::TurnInPlace()
 			}
 		}
 
-		if (GEngine) GEngine->AddOnScreenDebugMessage(1, -1, FColor::Cyan, FString::Printf(TEXT("RootBoneYawOffset: %f"), RootBoneYawOffset));
+		//if (GEngine) GEngine->AddOnScreenDebugMessage(1, -1, FColor::Cyan, FString::Printf(TEXT("RootBoneYawOffset: %f"), RootBoneYawOffset));
 	}
 }
 
@@ -152,7 +154,7 @@ void UShooterAnimInstance::LeanInDirection(float DeltaTime)
 	const float Interp {FMath::FInterpTo(YawDelta, Target, DeltaTime, 0.6f)};
 	YawDelta = FMath::Clamp(Interp, -90.f, 90.f);
 
-	if (GEngine) GEngine->AddOnScreenDebugMessage(2, -1, FColor::Magenta, FString::Printf(TEXT("YawDelta: %f"), YawDelta));
-	if (GEngine) GEngine->AddOnScreenDebugMessage(3, -1, FColor::Red, FString::Printf(TEXT("Delta.Yaw: %f"), Delta.Yaw));
+	//if (GEngine) GEngine->AddOnScreenDebugMessage(2, -1, FColor::Magenta, FString::Printf(TEXT("YawDelta: %f"), YawDelta));
+	//if (GEngine) GEngine->AddOnScreenDebugMessage(3, -1, FColor::Red, FString::Printf(TEXT("Delta.Yaw: %f"), Delta.Yaw));
 	
 }

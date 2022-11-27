@@ -74,7 +74,8 @@ AShooterCharacter::AShooterCharacter() :
 	StartingARAmmo(120),
 
 	// combat variables
-	CombatState(ECombatState::ECS_UNOCCUPIED)
+	CombatState(ECombatState::ECS_UNOCCUPIED),
+	bCrouching(false)
 
 
 {
@@ -206,6 +207,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	                                 &AShooterCharacter::TakeActionButtonReleased);
 
 	PlayerInputComponent->BindAction("ReloadButton", IE_Pressed, this, &AShooterCharacter::ReloadButtonPressed);
+	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AShooterCharacter::CrouchButtonPressed);
 }
 
 
@@ -307,8 +309,6 @@ void AShooterCharacter::FireWeapon()
 
 		// start time between shots
 		StartFireTimer();
-
-		
 	}
 }
 
@@ -569,7 +569,7 @@ void AShooterCharacter::TakeActionButtonPressed()
 		TracedHitItem->StartItemCurve(this);
 
 		// play the item pickup sound
-		if(TracedHitItem->GetPickupSound())
+		if (TracedHitItem->GetPickupSound())
 		{
 			UGameplayStatics::PlaySound2D(this, TracedHitItem->GetPickupSound());
 		}
@@ -582,20 +582,20 @@ void AShooterCharacter::TakeActionButtonReleased()
 
 void AShooterCharacter::ReloadButtonPressed()
 {
-	if(EquippedWeapon == nullptr) return;
+	if (EquippedWeapon == nullptr) return;
 	ReloadWeapon();
 }
 
 void AShooterCharacter::ReloadWeapon()
 {
-	if(CombatState != ECombatState::ECS_UNOCCUPIED) return;
+	if (CombatState != ECombatState::ECS_UNOCCUPIED) return;
 
 	// do we have ammo of the correct type
-	if(CarryingAmmo() && !EquippedWeapon->ClipIsFull())
+	if (CarryingAmmo() && !EquippedWeapon->ClipIsFull())
 	{
 		CombatState = ECombatState::ECS_RELOADING;
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if(ReloadMontage && AnimInstance)
+		if (ReloadMontage && AnimInstance)
 		{
 			AnimInstance->Montage_Play(ReloadMontage);
 			AnimInstance->Montage_JumpToSection(EquippedWeapon->GetReloadMontageSection());
@@ -608,16 +608,16 @@ void AShooterCharacter::FinishReloading()
 	CombatState = ECombatState::ECS_UNOCCUPIED;
 
 	if (EquippedWeapon == nullptr) return;
-	
+
 	const auto AmmoType = EquippedWeapon->GetAmmoType();
-	if(AmmoMap.Contains(AmmoType))
+	if (AmmoMap.Contains(AmmoType))
 	{
 		// amount of ammo which the character is carrying of the equipped weapon type
 		int32 CarriedAmmo = AmmoMap[AmmoType];
 
 		// space left in the magazine of equipped weapon
 		const int32 MagEmptySpace = EquippedWeapon->GetMagazineCapacity() - EquippedWeapon->GetAmmo();
-		if(MagEmptySpace > CarriedAmmo)
+		if (MagEmptySpace > CarriedAmmo)
 		{
 			// fill the magazine with all the ammo character is carrying
 			EquippedWeapon->ReloadAmmo(CarriedAmmo);
@@ -631,7 +631,6 @@ void AShooterCharacter::FinishReloading()
 		}
 
 		AmmoMap.Add(AmmoType, CarriedAmmo);
-		
 	}
 }
 
@@ -651,7 +650,8 @@ void AShooterCharacter::AutoFireReset()
 		{
 			FireWeapon();
 		}
-	} else
+	}
+	else
 	{
 		// reload weapon
 		ReloadWeapon();
@@ -779,7 +779,7 @@ FVector AShooterCharacter::GetCameraInterpLocation() const
 
 void AShooterCharacter::GetPickupItem(AItem* Item)
 {
-	if(Item->GetEquipSound())
+	if (Item->GetEquipSound())
 	{
 		UGameplayStatics::PlaySound2D(this, Item->GetEquipSound());
 	}
@@ -806,20 +806,19 @@ bool AShooterCharacter::WeaponHasAmmo() const
 
 bool AShooterCharacter::CarryingAmmo()
 {
-	if(EquippedWeapon == nullptr) return false;
+	if (EquippedWeapon == nullptr) return false;
 	auto AmmoType = EquippedWeapon->GetAmmoType();
 
-	if(AmmoMap.Contains(AmmoType))
+	if (AmmoMap.Contains(AmmoType))
 	{
 		return AmmoMap[AmmoType] > 0;
 	}
 	return false;
-	
 }
 
 void AShooterCharacter::GrabClip()
 {
-	if(EquippedWeapon == nullptr || HandSceneComponent == nullptr) return;
+	if (EquippedWeapon == nullptr || HandSceneComponent == nullptr) return;
 
 	// index for the clip bone on the equipped weapon
 	const int32 ClipBoneIndex = EquippedWeapon->GetItemMesh()->GetBoneIndex(EquippedWeapon->GetClipBoneName());
@@ -829,13 +828,20 @@ void AShooterCharacter::GrabClip()
 
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, true);
 	HandSceneComponent->AttachToComponent(GetMesh(), AttachmentRules, FName(TEXT("hand_l")));
-	
+
 	HandSceneComponent->SetWorldTransform(ClipTransform);
 	EquippedWeapon->SetMovingClip(true);
-	
 }
 
 void AShooterCharacter::ReleaseClip()
 {
 	EquippedWeapon->SetMovingClip(false);
+}
+
+void AShooterCharacter::CrouchButtonPressed()
+{
+	if(!GetCharacterMovement()->IsFalling())
+	{
+		bCrouching = !bCrouching;
+	}
 }
