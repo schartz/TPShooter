@@ -2,6 +2,8 @@
 
 
 #include "ShooterCharacter.h"
+
+#include "Ammo.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
@@ -817,11 +819,17 @@ void AShooterCharacter::GetPickupItem(AItem* Item)
 	{
 		UGameplayStatics::PlaySound2D(this, Item->GetEquipSound());
 	}
+	
 	auto Weapon = Cast<AWeapon>(Item);
-
 	if (Weapon)
 	{
 		SwapWeapon(Weapon);
+	}
+
+	auto Ammo = Cast<AAmmo>(Item);
+	if(Ammo)
+	{
+		PickupAmmo(Ammo);
 	}
 }
 
@@ -946,4 +954,25 @@ void AShooterCharacter::StopAiming()
 	{
 		GetCharacterMovement()->MaxWalkSpeed = BaseMovementSpeed;
 	}
+}
+
+void AShooterCharacter::PickupAmmo(AAmmo* Ammo)
+{
+	// check if AmmoMap already contains this type of ammo
+	if(AmmoMap.Find(Ammo->GetAmmoType()))
+	{
+		// update the amount of ammo in the AMmoMap
+		AmmoMap[Ammo->GetAmmoType()] = AmmoMap[Ammo->GetAmmoType()] + Ammo->GetItemCount();
+	}
+
+	if(EquippedWeapon->GetAmmoType() == Ammo->GetAmmoType())
+	{
+		if(EquippedWeapon->GetAmmo() == 0)
+		{
+			ReloadWeapon();
+		}
+	}
+
+	// clean up this ammo object
+	Ammo->Destroy();
 }

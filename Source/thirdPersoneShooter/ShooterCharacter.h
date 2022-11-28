@@ -124,6 +124,8 @@ protected:
 
 	void StartAiming();
 	void StopAiming();
+
+	void PickupAmmo(class AAmmo* Ammo);
 	
 
 public:	
