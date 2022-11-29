@@ -32,12 +32,22 @@ enum class EItemState:uint8
 	EIS_Max UMETA(DisplayName = "Default_MAXED")
 };
 
+// Enum class for item types
+UENUM(BlueprintType)
+enum class EItemType:uint8
+{
+	EIT_Weapon UMETA(DisplayName = "Weapon"),
+	EIT_Ammo UMETA(DisplayName = "Ammo"),
+
+	EIT_Max UMETA(DisplayName = "Default_MAXED")
+};
+
 UCLASS()
 class THIRDPERSONESHOOTER_API AItem : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AItem();
 
@@ -48,18 +58,18 @@ protected:
 	// Called when overlapping area sphere begins
 	UFUNCTION()
 	void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-	    UPrimitiveComponent* OtherComponent,
-	    int32 OtherBodyIndex,
-	    bool bFromSweep,
-	    const FHitResult& SweepResult);
+	                          AActor* OtherActor,
+	                          UPrimitiveComponent* OtherComponent,
+	                          int32 OtherBodyIndex,
+	                          bool bFromSweep,
+	                          const FHitResult& SweepResult);
 
 	// Called when overlapping area sphere ends
 	UFUNCTION()
 	void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComponent,
-		int32 OtherBodyIndex);
+	                        AActor* OtherActor,
+	                        UPrimitiveComponent* OtherComponent,
+	                        int32 OtherBodyIndex);
 
 	// set the ActiveStars array of booleans based on rarity
 	void SetActiveStarts();
@@ -73,7 +83,12 @@ protected:
 	// handles item interpolation when in EquipInterping state
 	void ItemInterp(float DeltaTime);
 
-public:	
+	// get Interp location based in the item type
+	FVector GetInterpLocation();
+
+	void PlayPickupSound();
+
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -81,7 +96,7 @@ private:
 	// skeletal mesh for the item
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
 	class USkeletalMeshComponent* ItemMesh;
-	
+
 	// line trace collides with box to show HUD widgets
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
 	class UBoxComponent* CollisionBox;
@@ -105,9 +120,9 @@ private:
 	// item rarity more start means more rare the item is
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
 	EItemRarity ItemRarity;
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
-	TArray<bool>ActiveStars;
+	TArray<bool> ActiveStars;
 
 	// this item's state
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
@@ -155,20 +170,28 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
 	class USoundCue* EquipSound;
 
-public:
+	// enum for the type of the item this item is
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
+	EItemType ItemType;
 
-	FORCEINLINE UWidgetComponent* GetPickupWidget() const {return PickupWidget;}
-	FORCEINLINE USphereComponent* GetAreaSphere() const {return AreaSphere;}
-	FORCEINLINE UBoxComponent* GetCollisionBox() const {return CollisionBox;}
-	FORCEINLINE USkeletalMeshComponent* GetItemMesh() const {return ItemMesh;}
-	FORCEINLINE EItemState GetItemState() const {return ItemState;}
-	FORCEINLINE class USoundCue* GetPickupSound() const {return PickupSound;}
-	FORCEINLINE class USoundCue* GetEquipSound() const {return EquipSound;}
-	FORCEINLINE int32 GetItemCount() const {return ItemCount;}
-	
+	// Index of the location where an item will interp to upon pickup
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
+	int32 InterToLocationIndex;
+
+public:
+	FORCEINLINE UWidgetComponent* GetPickupWidget() const { return PickupWidget; }
+	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
+	FORCEINLINE UBoxComponent* GetCollisionBox() const { return CollisionBox; }
+	FORCEINLINE USkeletalMeshComponent* GetItemMesh() const { return ItemMesh; }
+	FORCEINLINE EItemState GetItemState() const { return ItemState; }
+	FORCEINLINE class USoundCue* GetPickupSound() const { return PickupSound; }
+	FORCEINLINE class USoundCue* GetEquipSound() const { return EquipSound; }
+	FORCEINLINE int32 GetItemCount() const { return ItemCount; }
+
 	void SetItemState(EItemState State);
 
 	// Called from the AShooterCharacter class
 	void StartItemCurve(class AShooterCharacter* InteractingCharacter);
-	
+	// called in AShooterCharacter::GetPickupItem
+	void PlayEquipSound();
 };

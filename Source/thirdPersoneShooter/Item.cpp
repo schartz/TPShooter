@@ -25,7 +25,9 @@ bInterping(false),
 ZCurveTime(0.7f),
 ItemInterpX(0.f),
 ItemInterpY(0.f),
-InterpInitialYawOffset(0.f)
+InterpInitialYawOffset(0.f),
+ItemType(EItemType::EIT_Max),
+InterToLocationIndex(0)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -238,11 +240,13 @@ void AItem::StartItemCurve(AShooterCharacter* InteractingCharacter)
 	// store the handle to the character
 	Character = InteractingCharacter;
 
+	// get array index from InterpLocations with the lowest item count
+	InterToLocationIndex = Character->GetInterpLocationIndex();
+	// Add 1 to the item count for this interp location struct
+	Character->IncrementInterpLocationItemCount(InterToLocationIndex, 1);
+	
 	// play the item pickup sound
-	if (PickupSound)
-	{
-		UGameplayStatics::PlaySound2D(this, PickupSound);
-	}
+	PlayPickupSound();
 
 	// interp start location is Item's current location
 	ItemInterpStartLocation = GetActorLocation();
@@ -263,6 +267,8 @@ void AItem::FinishInterping()
 	bInterping = false;
 	if (Character)
 	{
+		// subtract 1 from the item count of the interp location struct
+		Character->IncrementInterpLocationItemCount(InterToLocationIndex, -1);
 		Character->GetPickupItem(this);
 	}
 }
@@ -284,8 +290,9 @@ void AItem::ItemInterp(float DeltaTime)
 
 		// get the items initial location when curve started
 		FVector ItemLocation = ItemInterpStartLocation;
+		
 		// get location in front of the camera
-		const FVector CameraInterpLocation = Character->GetCameraInterpLocation();
+		const FVector CameraInterpLocation { GetInterpLocation()};
 
 		// vector from item to camera location
 		const FVector ItemToCamera{FVector(0.f, 0.f, (CameraInterpLocation - ItemLocation).Z)};
@@ -312,6 +319,55 @@ void AItem::ItemInterp(float DeltaTime)
 		
 	}
 	
+}
+
+FVector AItem::GetInterpLocation()
+{
+	if(Character == nullptr) return FVector(0.f);
+	switch (ItemType)
+	{
+	case EItemType::EIT_Ammo:
+		return Character->GetInterpLocation(InterToLocationIndex).SceneComponent->GetComponentLocation();
+		break;
+		
+	case EItemType::EIT_Weapon:
+		return Character->GetInterpLocation(0).SceneComponent->GetComponentLocation();
+		break;
+		
+	default:
+		return FVector(0.f);
+		break;
+	}
+}
+
+void AItem::PlayPickupSound()
+{
+	if(Character)
+	{
+		if(Character->ShouldPlayPickupSound())
+		{
+			Character->StartPickupSoundTimer();
+			if(PickupSound)
+			{
+				UGameplayStatics::PlaySound2D(this, PickupSound);
+			}
+		}
+	}
+}
+
+void AItem::PlayEquipSound()
+{
+	if(Character)
+	{
+		if(Character->ShouldPlayEquipSound())
+		{
+			Character->StartEquipSoundTimer();
+			if(EquipSound)
+			{
+				UGameplayStatics::PlaySound2D(this, EquipSound);
+			}
+		}
+	}
 }
 
 

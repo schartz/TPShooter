@@ -17,6 +17,20 @@ enum class ECombatState: uint8
 	ECS_MAX UMETA(DisplayName = "DisplayMax"),	
 };
 
+USTRUCT(BlueprintType)
+struct  FInterpLocation
+{
+	GENERATED_BODY()
+
+	// USceneComponent to be used for its location as interping finish location
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	USceneComponent* SceneComponent;
+
+	// number of items interping to this location
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	int32 ItemCount;
+};
+
 UCLASS()
 class THIRDPERSONESHOOTER_API AShooterCharacter : public ACharacter
 {
@@ -126,6 +140,8 @@ protected:
 	void StopAiming();
 
 	void PickupAmmo(class AAmmo* Ammo);
+
+	void InitializeInterpLocations();
 	
 
 public:	
@@ -361,6 +377,43 @@ private:
 
 	// true when aiming button is pressed
 	bool bAimingButtonPressed;
+
+
+	// extra USceneComponent to be used for various interpolation end points
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=SceneComponents, meta=(AllowPrivateAccess="true"))
+	class USceneComponent* WeaponInterpComp;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=SceneComponents, meta=(AllowPrivateAccess="true"))
+	class USceneComponent* InterpComp1;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=SceneComponents, meta=(AllowPrivateAccess="true"))
+	class USceneComponent* InterpComp2;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=SceneComponents, meta=(AllowPrivateAccess="true"))
+	class USceneComponent* InterpComp3;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=SceneComponents, meta=(AllowPrivateAccess="true"))
+	class USceneComponent* InterpComp4;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=SceneComponents, meta=(AllowPrivateAccess="true"))
+	class USceneComponent* InterpComp5;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=SceneComponents, meta=(AllowPrivateAccess="true"))
+	class USceneComponent* InterpComp6;
+
+	// array of interp location structs
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=SceneComponents, meta=(AllowPrivateAccess="true"))
+	TArray<FInterpLocation> InterpLocations;
+	
+	FTimerHandle PickupSoundTimer;
+	FTimerHandle EquipSoundTimer;
+
+	bool bShouldPlayPickupSound;
+	bool bShouldPlayEquipSound;
+
+	void ResetPickupSoundTimer();
+	void ResetEquipSoundTimer();
+
+	// time to wait before we can play another pickup sound
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=ItemSounds, meta=(AllowPrivateAccess="true"))
+	float PickupSoundResetTime;
+	// time to wait before we can play another equip sound
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=ItemSounds, meta=(AllowPrivateAccess="true"))
+	float EquipSoundResetTime;
 	
 	
 
@@ -371,6 +424,11 @@ public:
 	FORCEINLINE int8 GetOverlappedItemCount() const {return OverlappedItemCount;}
 	FORCEINLINE ECombatState GetCombatState() const {return CombatState;}
 	FORCEINLINE bool GetCrouching() const {return bCrouching;}
+	FORCEINLINE bool ShouldPlayPickupSound() const {return bShouldPlayPickupSound;}
+	FORCEINLINE bool ShouldPlayEquipSound() const {return bShouldPlayEquipSound;}
+
+	
+	FInterpLocation GetInterpLocation(int32 idx);
 
 	/**
 	 * Adds or subtracts to and from OverlappedItemCount.
@@ -408,9 +466,17 @@ public:
 	// called when the fire button is pressed
 	void FireWeapon();
 
-	//
-	FVector GetCameraInterpLocation() const;
+	// No Longer needed. AItem now has GetInterpLocation method
+	//FVector GetCameraInterpLocation() const;
 
 	void GetPickupItem(class AItem* Item);
+
+	// returns an index from the InterpLocations array with the lowest item count
+	int32 GetInterpLocationIndex();
+
+	void IncrementInterpLocationItemCount(int32 Index, int32 Amount);
+
+	void StartPickupSoundTimer();
+	void StartEquipSoundTimer();
 
 };
