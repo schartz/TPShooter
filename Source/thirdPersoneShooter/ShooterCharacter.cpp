@@ -590,12 +590,6 @@ void AShooterCharacter::TakeActionButtonPressed()
 	{
 		// start the item interpolation curve for pickup
 		TracedHitItem->StartItemCurve(this);
-
-		// play the item pickup sound
-		if (TracedHitItem->GetPickupSound())
-		{
-			UGameplayStatics::PlaySound2D(this, TracedHitItem->GetPickupSound());
-		}
 	}
 }
 
