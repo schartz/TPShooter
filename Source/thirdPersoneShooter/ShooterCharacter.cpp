@@ -175,6 +175,8 @@ void AShooterCharacter::BeginPlay()
 
 	// Spawn the default weapon attach this to the mesh
 	EquipWeapon(SpawnDefaultWeapon());
+	EquippedWeapon->DisableCustomDepth();
+	EquippedWeapon->DisableGlowMaterial();
 
 	InitializeAmmoMap();
 

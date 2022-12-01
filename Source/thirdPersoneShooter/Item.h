@@ -90,6 +90,13 @@ protected:
 	
 	virtual void InitializeCustomDepth();
 
+	/** This function is the equivalent of the construction script tab of the blueprint editor for any BP based on this Item class.*/
+	virtual void OnConstruction(const FTransform& Transform) override;
+
+	void EnableGlowMaterial();
+
+	void UpdatePulse();
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -180,6 +187,45 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
 	int32 InterToLocationIndex;
 
+	// index for the material we would like to change at the runtime
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
+	int32 MaterialIndex;
+
+	// Dynamic Material Instance that we can change at runtime
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
+	class UMaterialInstanceDynamic* DynamicMaterialInstance;
+
+	// Material Instance that will be used with the Dynamic Material Instance
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
+	class UMaterialInstance* MaterialInstance;
+	
+	bool bCanChangeCustomDepth;
+
+	// curve to drive the dynamic material parameters
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
+	class UCurveVector* PulseCurve;
+
+	// curve to drive the dynamic material parameters
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
+	class UCurveVector* InterpPulseCurve;
+
+	// time for the pulse timer
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
+	float PulseCurveTime;
+	
+	FTimerHandle PulseTimer;
+
+	// comes from material instance M_SMG_Mat_Inst
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
+	float GlowAmount;
+	// comes from material instance M_SMG_Mat_Inst
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
+	float FresnelExponent;
+	// comes from material instance M_SMG_Mat_Inst
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=ItemProperties, meta=(AllowPrivateAccess="true"))
+	float FresnelReflectFraction;
+	void ResetPulseTimer();
+
 public:
 	FORCEINLINE UWidgetComponent* GetPickupWidget() const { return PickupWidget; }
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
@@ -198,4 +244,6 @@ public:
 	void PlayEquipSound();
 	virtual void EnableCustomDepth();
 	virtual void DisableCustomDepth();
+	void DisableGlowMaterial();
+	void StartPulseTimer();
 };
