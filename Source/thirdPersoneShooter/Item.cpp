@@ -66,6 +66,9 @@ void AItem::BeginPlay()
 
 	// Set item properties based on it's current state
 	SetItemProperties(ItemState);
+
+	// set custom depth to disable
+	InitializeCustomDepth();
 	
 }
 
@@ -368,6 +371,22 @@ void AItem::PlayEquipSound()
 			}
 		}
 	}
+}
+
+
+void AItem::EnableCustomDepth()
+{
+	ItemMesh->SetRenderCustomDepth(true);
+}
+
+void AItem::DisableCustomDepth()
+{
+	ItemMesh->SetRenderCustomDepth(false);
+}
+
+void AItem::InitializeCustomDepth()
+{
+	DisableCustomDepth();
 }
 
 

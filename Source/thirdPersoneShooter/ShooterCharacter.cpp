@@ -563,7 +563,9 @@ void AShooterCharacter::TraceForItems()
 			TracedHitItem = Cast<AItem>(ItemTraceResult.GetActor());
 			if (TracedHitItem and TracedHitItem->GetPickupWidget())
 			{
+				// show item's pickup widget
 				TracedHitItem->GetPickupWidget()->SetVisibility(true);
+				TracedHitItem->EnableCustomDepth();
 			}
 
 			if (TracedHitItemLastFrame)
@@ -573,6 +575,7 @@ void AShooterCharacter::TraceForItems()
 					// we are hitting a different AItem this frame from last frame
 					// or AItem us null
 					TracedHitItemLastFrame->GetPickupWidget()->SetVisibility(false);
+					TracedHitItemLastFrame->DisableCustomDepth();
 				}
 			}
 
@@ -585,6 +588,7 @@ void AShooterCharacter::TraceForItems()
 		// No longer overlapping with any item
 		// TraceHitItemLastFrame should not show widget
 		TracedHitItemLastFrame->GetPickupWidget()->SetVisibility(false);
+		TracedHitItemLastFrame->DisableCustomDepth();
 	}
 }
 

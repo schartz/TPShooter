@@ -87,6 +87,8 @@ protected:
 	FVector GetInterpLocation();
 
 	void PlayPickupSound();
+	
+	virtual void InitializeCustomDepth();
 
 public:
 	// Called every frame
@@ -194,4 +196,6 @@ public:
 	void StartItemCurve(class AShooterCharacter* InteractingCharacter);
 	// called in AShooterCharacter::GetPickupItem
 	void PlayEquipSound();
+	virtual void EnableCustomDepth();
+	virtual void DisableCustomDepth();
 };
