@@ -639,6 +639,7 @@ void AShooterCharacter::FireButtonReleased()
 
 void AShooterCharacter::TakeActionButtonPressed()
 {
+	if(CombatState != ECombatState::ECS_UNOCCUPIED) return;
 	if (TracedHitItem)
 	{
 		// start the item interpolation curve for pickup
@@ -1185,7 +1186,10 @@ void AShooterCharacter::FiveKeyPressed()
 
 void AShooterCharacter::ExchangeInventoryItems(int32 CurrentItemIndex, int32 NewItemIndex)
 {
-	if ((CurrentItemIndex == NewItemIndex) || (NewItemIndex >= Inventory.Num())) return;
+	if ((CurrentItemIndex == NewItemIndex) ||
+		(NewItemIndex >= Inventory.Num()) ||
+		(CombatState != ECombatState::ECS_UNOCCUPIED)) return;
+	
 	auto OldEquippedWeapon = EquippedWeapon;
 	auto NewWeapon = Cast<AWeapon>(Inventory[NewItemIndex]);
 	EquipWeapon(NewWeapon);
