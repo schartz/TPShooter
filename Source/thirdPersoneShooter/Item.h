@@ -25,7 +25,7 @@ enum class EItemState:uint8
 {
 	EIS_Pickup UMETA(DisplayName = "Pickup"),
 	EIS_EquipInterping UMETA(DisplayName = "EquipInterping"),
-	EIS_PickupedUp UMETA(DisplayName = "PickupedUp"),
+	EIS_PickedUp UMETA(DisplayName = "PickupedUp"),
 	EIS_Equipped UMETA(DisplayName = "Equipped"),
 	EIS_Falling UMETA(DisplayName = "Falling"),
 
@@ -226,6 +226,22 @@ private:
 	float FresnelReflectFraction;
 	void ResetPulseTimer();
 
+	// background for this item in the inventory
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Inventory, meta=(AllowPrivateAccess="true"))
+	class UTexture2D* IconBackground;
+
+	// icon for this item in the inventory
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Inventory, meta=(AllowPrivateAccess="true"))
+	class UTexture2D* IconItem;
+
+	// icon for this item in the inventory
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Inventory, meta=(AllowPrivateAccess="true"))
+	class UTexture2D* AmmoIcon;
+
+	// slot in the inventory array
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Inventory, meta=(AllowPrivateAccess="true"))
+	int32 SlotIndex;
+
 public:
 	FORCEINLINE UWidgetComponent* GetPickupWidget() const { return PickupWidget; }
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
@@ -235,6 +251,9 @@ public:
 	FORCEINLINE class USoundCue* GetPickupSound() const { return PickupSound; }
 	FORCEINLINE class USoundCue* GetEquipSound() const { return EquipSound; }
 	FORCEINLINE int32 GetItemCount() const { return ItemCount; }
+	FORCEINLINE int32 GetSlotIndex() const { return SlotIndex; }
+	FORCEINLINE void SetSlotIndex(int32 Idx) { SlotIndex = Idx; }
+	
 
 	void SetItemState(EItemState State);
 

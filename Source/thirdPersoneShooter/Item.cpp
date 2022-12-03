@@ -37,7 +37,8 @@ AItem::AItem():
 	PulseCurveTime(5.f),
 	GlowAmount(150.f),
 	FresnelExponent(3.f),
-	FresnelReflectFraction(4.f)
+	FresnelReflectFraction(4.f),
+	SlotIndex(0)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -200,6 +201,22 @@ void AItem::SetItemProperties(EItemState State)
 		CollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		break;
 
+	case EItemState::EIS_PickedUp:
+		PickupWidget->SetVisibility(false);
+
+		ItemMesh->SetSimulatePhysics(false);
+		ItemMesh->SetEnableGravity(false);
+		ItemMesh->SetVisibility(false);
+		ItemMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		break;
+
 	case EItemState::EIS_Equipped:
 		PickupWidget->SetVisibility(false);
 
@@ -288,7 +305,6 @@ void AItem::FinishInterping()
 		// subtract 1 from the item count of the interp location struct
 		Character->IncrementInterpLocationItemCount(InterToLocationIndex, -1);
 		Character->GetPickupItem(this);
-		SetItemState(EItemState::EIS_PickupedUp);
 	}
 
 	bCanChangeCustomDepth = true;
@@ -476,7 +492,7 @@ void AItem::UpdatePulse()
 		break;
 	};
 
-	if(DynamicMaterialInstance)
+	if (DynamicMaterialInstance)
 	{
 		DynamicMaterialInstance->SetScalarParameterValue(TEXT("GlowAmount"), CurveValue.X * GlowAmount);
 		DynamicMaterialInstance->SetScalarParameterValue(TEXT("FresnelExponent"), CurveValue.Y * FresnelExponent);

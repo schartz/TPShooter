@@ -31,6 +31,8 @@ struct  FInterpLocation
 	int32 ItemCount;
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FEquipItemDelegate, int32, CurrentSlotIndex, int32, NewSLotIndex);
+
 UCLASS()
 class THIRDPERSONESHOOTER_API AShooterCharacter : public ACharacter
 {
@@ -142,6 +144,14 @@ protected:
 	void PickupAmmo(class AAmmo* Ammo);
 
 	void InitializeInterpLocations();
+
+	void FKeyPressed();
+	void OneKeyPressed();
+	void TwoKeyPressed();
+	void ThreeKeyPressed();
+	void FourKeyPressed();
+	void FiveKeyPressed();
+	void ExchangeInventoryItems(int32 CurrentItemIndex, int32 NewItemIndex);
 	
 
 public:	
@@ -414,6 +424,17 @@ private:
 	// time to wait before we can play another equip sound
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=ItemSounds, meta=(AllowPrivateAccess="true"))
 	float EquipSoundResetTime;
+
+	// an array of AItems for our inventory
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Inventory, meta=(AllowPrivateAccess="true"))
+	TArray<class AItem*> Inventory;
+
+	const int32 InventoryCapacity{6};
+
+
+	// delegate for sending slot information to the inventory bar when equipping
+	UPROPERTY(BlueprintAssignable, Category=Delegates, meta=(AllowPrivateAccess="true"))
+	FEquipItemDelegate EquipItemDelegate;
 	
 	
 
