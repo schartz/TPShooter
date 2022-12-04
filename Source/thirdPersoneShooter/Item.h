@@ -86,7 +86,7 @@ protected:
 	// get Interp location based in the item type
 	FVector GetInterpLocation();
 
-	void PlayPickupSound();
+	void PlayPickupSound(bool bForcePlaySound = false);
 	
 	virtual void InitializeCustomDepth();
 
@@ -253,14 +253,15 @@ public:
 	FORCEINLINE int32 GetItemCount() const { return ItemCount; }
 	FORCEINLINE int32 GetSlotIndex() const { return SlotIndex; }
 	FORCEINLINE void SetSlotIndex(int32 Idx) { SlotIndex = Idx; }
+	FORCEINLINE void SetCharacter(class AShooterCharacter* Char) { Character = Char; }
 	
 
 	void SetItemState(EItemState State);
 
 	// Called from the AShooterCharacter class
-	void StartItemCurve(class AShooterCharacter* InteractingCharacter);
+	void StartItemCurve(class AShooterCharacter* InteractingCharacter, bool ForcePlaySound = false);
 	// called in AShooterCharacter::GetPickupItem
-	void PlayEquipSound();
+	void PlayEquipSound(bool bForcePlaySound = false);
 	virtual void EnableCustomDepth();
 	virtual void DisableCustomDepth();
 	void DisableGlowMaterial();

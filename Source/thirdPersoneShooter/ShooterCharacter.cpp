@@ -179,6 +179,7 @@ void AShooterCharacter::BeginPlay()
 	EquippedWeapon->DisableGlowMaterial();
 	Inventory.Add(EquippedWeapon);
 	EquippedWeapon->SetSlotIndex(0);
+	EquippedWeapon->SetCharacter(this);
 
 	InitializeAmmoMap();
 
@@ -643,7 +644,7 @@ void AShooterCharacter::TakeActionButtonPressed()
 	if (TracedHitItem)
 	{
 		// start the item interpolation curve for pickup
-		TracedHitItem->StartItemCurve(this);
+		TracedHitItem->StartItemCurve(this, true);
 
 		// set it to null so that item interp curve can only be triggerred once per pickup
 		TracedHitItem = nullptr;
@@ -719,7 +720,6 @@ void AShooterCharacter::FinishReloading()
 		AmmoMap.Add(AmmoType, CarriedAmmo);
 	}
 }
-
 void AShooterCharacter::StartFireTimer()
 {
 	CombatState = ECombatState::ECS_FIRE_TIMER_IN_PROGRESS;
@@ -1196,4 +1196,22 @@ void AShooterCharacter::ExchangeInventoryItems(int32 CurrentItemIndex, int32 New
 
 	OldEquippedWeapon->SetItemState(EItemState::EIS_PickedUp);
 	NewWeapon->SetItemState(EItemState::EIS_Equipped);
+	CombatState = ECombatState::ECS_Equipping;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	// play animation for equip while swapping weapons 
+	if(AnimInstance && EquipMontage)
+	{
+		AnimInstance->Montage_Play(EquipMontage, 1.0f);
+		AnimInstance->Montage_JumpToSection(FName("Equip"));
+	}
+
+	NewWeapon->PlayEquipSound(true);
+}
+
+
+void AShooterCharacter::FinishEquipping()
+{
+	CombatState = ECombatState::ECS_UNOCCUPIED;
 }

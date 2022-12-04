@@ -113,6 +113,10 @@ private:
 	// true when turning in place
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Combat, meta=(AllowPrivateAccess = "true"))
 	bool bTurningInPlace;
+
+	// true when crouching
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Crouching, meta=(AllowPrivateAccess = "true"))
+	bool bEquipping;
 	
 
 public:

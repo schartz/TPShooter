@@ -14,6 +14,7 @@ enum class ECombatState: uint8
 	ECS_UNOCCUPIED UMETA(DisplayName = "Unoccupied"),	
 	ECS_FIRE_TIMER_IN_PROGRESS UMETA(DisplayName = "FireTimerInProgress"),	
 	ECS_RELOADING UMETA(DisplayName = "Reloading"),	
+	ECS_Equipping UMETA(DisplayName = "Equipping"),	
 	ECS_MAX UMETA(DisplayName = "DisplayMax"),	
 };
 
@@ -118,6 +119,10 @@ protected:
 	void ReloadWeapon();
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
+
+	// weapon swap and equip function
+	UFUNCTION(BlueprintCallable)
+	void FinishEquipping();
 
 	// checks to see if we have ammo for the equipped weapon type
 	bool CarryingAmmo();
@@ -347,6 +352,10 @@ private:
 	// montage for reload animations
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Combat, meta=(AllowPrivateAccess="true"))
 	class UAnimMontage* ReloadMontage;
+
+	// montage for equip weapon animations while swapping weapons
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Combat, meta=(AllowPrivateAccess="true"))
+	class UAnimMontage* EquipMontage;
 
 	// transform of the clip when we first grab the clip during reloading
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Combat, meta=(AllowPrivateAccess="true"))
