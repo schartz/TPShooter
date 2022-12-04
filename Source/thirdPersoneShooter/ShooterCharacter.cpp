@@ -93,7 +93,10 @@ AShooterCharacter::AShooterCharacter() :
 	bShouldPlayPickupSound(true),
 	bShouldPlayEquipSound(true),
 	PickupSoundResetTime(0.2f),
-	EquipSoundResetTime(0.2f)
+	EquipSoundResetTime(0.2f),
+
+	// icon animation property
+	HighlightedSlot(-1)
 
 
 {
@@ -573,7 +576,25 @@ void AShooterCharacter::TraceForItems()
 		if (ItemTraceResult.bBlockingHit)
 		{
 			TracedHitItem = Cast<AItem>(ItemTraceResult.GetActor());
-
+			const auto TracedHitWeapon = Cast<AWeapon>(TracedHitItem);
+			if(TracedHitWeapon)
+			{
+				if(HighlightedSlot == -1)
+				{
+					// not currently highlighting a slot. Highlight one
+					HighlightInventorySLot();
+				}
+			}
+			else
+			{
+				// is a lot being highlighted ?
+				if(HighlightedSlot != -1)
+				{
+					// stop highlighting the slot
+					UnHighlightInventorySLot();
+				}
+			}
+			
 			// do not trace again for already interping item
 			if (TracedHitItem && TracedHitItem->GetItemState() == EItemState::EIS_EquipInterping)
 			{
@@ -585,11 +606,8 @@ void AShooterCharacter::TraceForItems()
 				// show item's pickup widget
 				TracedHitItem->GetPickupWidget()->SetVisibility(true);
 				TracedHitItem->EnableCustomDepth();
-
-				int32 t = Inventory.Num();
-				UE_LOG(LogTemp, Warning, TEXT("inventory %d"), Inventory.Num())
-				UE_LOG(LogTemp, Warning, TEXT("inventory %d"), INVENTORY_CAPACITY)
-				if (t >= INVENTORY_CAPACITY)
+				
+				if (Inventory.Num() >= INVENTORY_CAPACITY)
 				{
 					// inventory is full
 					TracedHitItem->SetCharacterInventoryFull(true);
@@ -1227,13 +1245,13 @@ void AShooterCharacter::ExchangeInventoryItems(int32 CurrentItemIndex, int32 New
 	 *
 	 ***/
 
-	/** This new version* allows for this allows for very fast weapon swapping. Player can swap weapon
+	/** This new version allows for this allows for very fast weapon swapping. Player can swap weapon
 	 *  before the swapping animation completes. Basically swapping animation cancelling.
 	 */
 	const bool bCanExchangeItems = (CurrentItemIndex != NewItemIndex) &&
 		(NewItemIndex < Inventory.Num()) &&
 		(CombatState == ECombatState::ECS_UNOCCUPIED || CombatState == ECombatState::ECS_Equipping);
-	
+
 	if (bCanExchangeItems)
 	{
 		auto OldEquippedWeapon = EquippedWeapon;
@@ -1257,8 +1275,36 @@ void AShooterCharacter::ExchangeInventoryItems(int32 CurrentItemIndex, int32 New
 	}
 }
 
-
 void AShooterCharacter::FinishEquipping()
 {
 	CombatState = ECombatState::ECS_UNOCCUPIED;
+}
+
+int32 AShooterCharacter::GetEmptyInventorySLot()
+{
+	for (int32 i = 0; i < Inventory.Num(); i++)
+	{
+		if (Inventory[i] == nullptr) return i;
+	}
+
+	if (Inventory.Num() < INVENTORY_CAPACITY)
+	{
+		return Inventory.Num();
+	}
+
+	// inventory is full
+	return -1;
+}
+
+void AShooterCharacter::HighlightInventorySLot()
+{
+	const int32 EmptySLot{GetEmptyInventorySLot()};
+	HighlightIconDelegate.Broadcast(EmptySLot, true);
+	HighlightedSlot = EmptySLot;
+}
+
+void AShooterCharacter::UnHighlightInventorySLot()
+{
+	HighlightIconDelegate.Broadcast(HighlightedSlot, false);
+	HighlightedSlot = -1;
 }

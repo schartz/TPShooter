@@ -33,6 +33,7 @@ struct  FInterpLocation
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FEquipItemDelegate, int32, CurrentSlotIndex, int32, NewSLotIndex);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FHighlightIconDelegate, int32, SlotIndex, bool, bStartAnimation);
 
 UCLASS()
 class THIRDPERSONESHOOTER_API AShooterCharacter : public ACharacter
@@ -157,6 +158,9 @@ protected:
 	void FourKeyPressed();
 	void FiveKeyPressed();
 	void ExchangeInventoryItems(int32 CurrentItemIndex, int32 NewItemIndex);
+	int32 GetEmptyInventorySLot();
+	void HighlightInventorySLot();
+
 	
 
 public:	
@@ -444,6 +448,14 @@ private:
 	// delegate for sending slot information to the inventory bar when equipping
 	UPROPERTY(BlueprintAssignable, Category=Delegates, meta=(AllowPrivateAccess="true"))
 	FEquipItemDelegate EquipItemDelegate;
+
+	// delegate for sending slot information to the weapon slot for playing icon animation
+	UPROPERTY(BlueprintAssignable, Category=Delegates, meta=(AllowPrivateAccess="true"))
+	FHighlightIconDelegate HighlightIconDelegate;
+
+	// the index for the currently highlighted slot
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Inventory, meta=(AllowPrivateAccess="true"))
+	int32 HighlightedSlot;
 	
 	
 
@@ -456,6 +468,7 @@ public:
 	FORCEINLINE bool GetCrouching() const {return bCrouching;}
 	FORCEINLINE bool ShouldPlayPickupSound() const {return bShouldPlayPickupSound;}
 	FORCEINLINE bool ShouldPlayEquipSound() const {return bShouldPlayEquipSound;}
+	void UnHighlightInventorySLot();
 
 	
 	FInterpLocation GetInterpLocation(int32 idx);

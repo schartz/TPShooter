@@ -133,6 +133,7 @@ void AItem::OnSphereEndOverlap(
 		if (ShooterCharacter)
 		{
 			ShooterCharacter->IncrementOverlappedItemCount(-1);
+			ShooterCharacter->UnHighlightInventorySLot();
 		}
 	}
 }
@@ -306,6 +307,7 @@ void AItem::FinishInterping()
 		// subtract 1 from the item count of the interp location struct
 		Character->IncrementInterpLocationItemCount(InterToLocationIndex, -1);
 		Character->GetPickupItem(this);
+		Character->UnHighlightInventorySLot();
 	}
 
 	bCanChangeCustomDepth = true;
