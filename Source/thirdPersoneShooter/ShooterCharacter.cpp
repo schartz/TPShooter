@@ -262,7 +262,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	PlayerInputComponent->BindAction("ReloadButton", IE_Pressed, this, &AShooterCharacter::ReloadButtonPressed);
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AShooterCharacter::CrouchButtonPressed);
-	
+
 	PlayerInputComponent->BindAction("FKey", IE_Pressed, this, &AShooterCharacter::FKeyPressed);
 	PlayerInputComponent->BindAction("1Key", IE_Pressed, this, &AShooterCharacter::OneKeyPressed);
 	PlayerInputComponent->BindAction("2Key", IE_Pressed, this, &AShooterCharacter::TwoKeyPressed);
@@ -573,18 +573,32 @@ void AShooterCharacter::TraceForItems()
 		if (ItemTraceResult.bBlockingHit)
 		{
 			TracedHitItem = Cast<AItem>(ItemTraceResult.GetActor());
-			
+
 			// do not trace again for already interping item
-			if(TracedHitItem && TracedHitItem->GetItemState() == EItemState::EIS_EquipInterping)
+			if (TracedHitItem && TracedHitItem->GetItemState() == EItemState::EIS_EquipInterping)
 			{
 				TracedHitItem = nullptr;
 			}
-			
+
 			if (TracedHitItem && TracedHitItem->GetPickupWidget())
 			{
 				// show item's pickup widget
 				TracedHitItem->GetPickupWidget()->SetVisibility(true);
 				TracedHitItem->EnableCustomDepth();
+
+				int32 t = Inventory.Num();
+				UE_LOG(LogTemp, Warning, TEXT("inventory %d"), Inventory.Num())
+				UE_LOG(LogTemp, Warning, TEXT("inventory %d"), INVENTORY_CAPACITY)
+				if (t >= INVENTORY_CAPACITY)
+				{
+					// inventory is full
+					TracedHitItem->SetCharacterInventoryFull(true);
+				}
+				else
+				{
+					// inventory has room
+					TracedHitItem->SetCharacterInventoryFull(false);
+				}
 			}
 
 			if (TracedHitItemLastFrame)
@@ -640,7 +654,7 @@ void AShooterCharacter::FireButtonReleased()
 
 void AShooterCharacter::TakeActionButtonPressed()
 {
-	if(CombatState != ECombatState::ECS_UNOCCUPIED) return;
+	if (CombatState != ECombatState::ECS_UNOCCUPIED) return;
 	if (TracedHitItem)
 	{
 		// start the item interpolation curve for pickup
@@ -720,6 +734,7 @@ void AShooterCharacter::FinishReloading()
 		AmmoMap.Add(AmmoType, CarriedAmmo);
 	}
 }
+
 void AShooterCharacter::StartFireTimer()
 {
 	CombatState = ECombatState::ECS_FIRE_TIMER_IN_PROGRESS;
@@ -814,7 +829,7 @@ AWeapon* AShooterCharacter::SpawnDefaultWeapon() const
 	return nullptr;
 }
 
-void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
+void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip, bool bSwapping)
 {
 	if (WeaponToEquip)
 	{
@@ -832,7 +847,7 @@ void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
 			// -1 == no EquippedWeapon yet. No need to reverse the icon animation
 			EquipItemDelegate.Broadcast(-1, WeaponToEquip->GetSlotIndex());
 		}
-		else
+		else if (!bSwapping)
 		{
 			EquipItemDelegate.Broadcast(EquippedWeapon->GetSlotIndex(), WeaponToEquip->GetSlotIndex());
 		}
@@ -857,15 +872,14 @@ void AShooterCharacter::DropWeapon()
 
 void AShooterCharacter::SwapWeapon(AWeapon* WeaponToSwap)
 {
-
-	if(Inventory.Num() - 1 >= EquippedWeapon->GetSlotIndex())
+	if (Inventory.Num() - 1 >= EquippedWeapon->GetSlotIndex())
 	{
 		Inventory[EquippedWeapon->GetSlotIndex()] = WeaponToSwap;
 		WeaponToSwap->SetSlotIndex(EquippedWeapon->GetSlotIndex());
 	}
-	
+
 	DropWeapon();
-	EquipWeapon(WeaponToSwap);
+	EquipWeapon(WeaponToSwap, true);
 	TracedHitItem = nullptr;
 	TracedHitItemLastFrame = nullptr;
 }
@@ -890,7 +904,7 @@ void AShooterCharacter::GetPickupItem(AItem* Item)
 	auto Weapon = Cast<AWeapon>(Item);
 	if (Weapon)
 	{
-		if(Inventory.Num() < InventoryCapacity)
+		if (Inventory.Num() < INVENTORY_CAPACITY)
 		{
 			Weapon->SetSlotIndex(Inventory.Num());
 			Inventory.Add(Weapon);
@@ -1122,19 +1136,18 @@ void AShooterCharacter::StartPickupSoundTimer()
 {
 	bShouldPlayPickupSound = false;
 	GetWorldTimerManager().SetTimer(PickupSoundTimer,
-		this,
-		&AShooterCharacter::ResetPickupSoundTimer,
-		PickupSoundResetTime);
-	
+	                                this,
+	                                &AShooterCharacter::ResetPickupSoundTimer,
+	                                PickupSoundResetTime);
 }
 
 void AShooterCharacter::StartEquipSoundTimer()
 {
 	bShouldPlayEquipSound = false;
 	GetWorldTimerManager().SetTimer(EquipSoundTimer,
-		this,
-		&AShooterCharacter::ResetEquipSoundTimer,
-		EquipSoundResetTime);
+	                                this,
+	                                &AShooterCharacter::ResetEquipSoundTimer,
+	                                EquipSoundResetTime);
 }
 
 void AShooterCharacter::ResetPickupSoundTimer()
@@ -1186,28 +1199,62 @@ void AShooterCharacter::FiveKeyPressed()
 
 void AShooterCharacter::ExchangeInventoryItems(int32 CurrentItemIndex, int32 NewItemIndex)
 {
-	if ((CurrentItemIndex == NewItemIndex) ||
-		(NewItemIndex >= Inventory.Num()) ||
-		(CombatState != ECombatState::ECS_UNOCCUPIED)) return;
+	/**
+	 *Following code allows weapon swap only after one swap has been completed
+	*
+		if ((CurrentItemIndex == NewItemIndex) ||
+			(NewItemIndex >= Inventory.Num()) ||
+			(CombatState != ECombatState::ECS_UNOCCUPIED)) return;
+
+		auto OldEquippedWeapon = EquippedWeapon;
+		auto NewWeapon = Cast<AWeapon>(Inventory[NewItemIndex]);
+		EquipWeapon(NewWeapon);
+
+		OldEquippedWeapon->SetItemState(EItemState::EIS_PickedUp);
+		NewWeapon->SetItemState(EItemState::EIS_Equipped);
+		CombatState = ECombatState::ECS_Equipping;
+
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+		// play animation for equip while swapping weapons 
+		if (AnimInstance && EquipMontage)
+		{
+			AnimInstance->Montage_Play(EquipMontage, 1.0f);
+			AnimInstance->Montage_JumpToSection(FName("Equip"));
+		}
+
+		NewWeapon->PlayEquipSound(true);
+	 *
+	 ***/
+
+	/** This new version* allows for this allows for very fast weapon swapping. Player can swap weapon
+	 *  before the swapping animation completes. Basically swapping animation cancelling.
+	 */
+	const bool bCanExchangeItems = (CurrentItemIndex != NewItemIndex) &&
+		(NewItemIndex < Inventory.Num()) &&
+		(CombatState == ECombatState::ECS_UNOCCUPIED || CombatState == ECombatState::ECS_Equipping);
 	
-	auto OldEquippedWeapon = EquippedWeapon;
-	auto NewWeapon = Cast<AWeapon>(Inventory[NewItemIndex]);
-	EquipWeapon(NewWeapon);
-
-	OldEquippedWeapon->SetItemState(EItemState::EIS_PickedUp);
-	NewWeapon->SetItemState(EItemState::EIS_Equipped);
-	CombatState = ECombatState::ECS_Equipping;
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-
-	// play animation for equip while swapping weapons 
-	if(AnimInstance && EquipMontage)
+	if (bCanExchangeItems)
 	{
-		AnimInstance->Montage_Play(EquipMontage, 1.0f);
-		AnimInstance->Montage_JumpToSection(FName("Equip"));
-	}
+		auto OldEquippedWeapon = EquippedWeapon;
+		auto NewWeapon = Cast<AWeapon>(Inventory[NewItemIndex]);
+		EquipWeapon(NewWeapon);
 
-	NewWeapon->PlayEquipSound(true);
+		OldEquippedWeapon->SetItemState(EItemState::EIS_PickedUp);
+		NewWeapon->SetItemState(EItemState::EIS_Equipped);
+		CombatState = ECombatState::ECS_Equipping;
+
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+		// play animation for equip while swapping weapons 
+		if (AnimInstance && EquipMontage)
+		{
+			AnimInstance->Montage_Play(EquipMontage, 1.0f);
+			AnimInstance->Montage_JumpToSection(FName("Equip"));
+		}
+
+		NewWeapon->PlayEquipSound(true);
+	}
 }
 
 

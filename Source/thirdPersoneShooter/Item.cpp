@@ -38,7 +38,8 @@ AItem::AItem():
 	GlowAmount(150.f),
 	FresnelExponent(3.f),
 	FresnelReflectFraction(4.f),
-	SlotIndex(0)
+	SlotIndex(0),
+	bCharacterInventoryFull(false)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -381,7 +382,7 @@ void AItem::PlayPickupSound(bool bForcePlaySound)
 {
 	if (Character)
 	{
-		if(bForcePlaySound)
+		if (bForcePlaySound)
 		{
 			if (PickupSound)
 			{
@@ -403,9 +404,9 @@ void AItem::PlayEquipSound(bool bForcePlaySound)
 {
 	if (Character)
 	{
-		if(bForcePlaySound)
+		if (bForcePlaySound)
 		{
-			if(EquipSound)
+			if (EquipSound)
 			{
 				UGameplayStatics::PlaySound2D(this, EquipSound);
 			}

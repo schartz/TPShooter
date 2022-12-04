@@ -95,7 +95,7 @@ protected:
 	class AWeapon* SpawnDefaultWeapon() const;
 
 	// take a weapon and equips it
-	void EquipWeapon(class AWeapon* WeaponToEquip);
+	void EquipWeapon(class AWeapon* WeaponToEquip, bool bSwapping = false);
 
 	// drop the currently Equipped weapon
 	void DropWeapon();
@@ -438,7 +438,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Inventory, meta=(AllowPrivateAccess="true"))
 	TArray<class AItem*> Inventory;
 
-	const int32 InventoryCapacity{6};
+	const int32 INVENTORY_CAPACITY{6};
 
 
 	// delegate for sending slot information to the inventory bar when equipping
