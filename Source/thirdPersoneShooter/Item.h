@@ -295,18 +295,44 @@ private:
 	class UTexture2D* IconBackGround;
 
 public:
+	FORCEINLINE void SetItemName(FString x) { ItemName = x;}
+	
 	FORCEINLINE UWidgetComponent* GetPickupWidget() const { return PickupWidget; }
+	
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
+	
 	FORCEINLINE UBoxComponent* GetCollisionBox() const { return CollisionBox; }
+	
 	FORCEINLINE USkeletalMeshComponent* GetItemMesh() const { return ItemMesh; }
+	
 	FORCEINLINE EItemState GetItemState() const { return ItemState; }
+
 	FORCEINLINE class USoundCue* GetPickupSound() const { return PickupSound; }
 	FORCEINLINE class USoundCue* GetEquipSound() const { return EquipSound; }
+	FORCEINLINE void SetPickupSound(class USoundCue* x) { PickupSound = x;}
+	FORCEINLINE void SetEquipSound(class USoundCue* x) { EquipSound = x; }
+
+	FORCEINLINE void SetIconItem(class UTexture2D* x) { IconItem = x;}
+	FORCEINLINE void SetAmmoIcon(class UTexture2D* x) { AmmoIcon = x; }
+	
 	FORCEINLINE int32 GetItemCount() const { return ItemCount; }
+	
 	FORCEINLINE int32 GetSlotIndex() const { return SlotIndex; }
 	FORCEINLINE void SetSlotIndex(int32 Idx) { SlotIndex = Idx; }
+	
 	FORCEINLINE void SetCharacter(class AShooterCharacter* Char) { Character = Char; }
+	
 	FORCEINLINE void SetCharacterInventoryFull(bool bFull) { bCharacterInventoryFull = bFull; }
+	
+	FORCEINLINE void SetMaterialInstance(class UMaterialInstance* x) { MaterialInstance = x; }
+	FORCEINLINE class UMaterialInstance* GetMaterialInstance() const { return MaterialInstance; }
+
+	FORCEINLINE void SetDynamicMaterialInstance(class UMaterialInstanceDynamic* x) { DynamicMaterialInstance = x; }
+	FORCEINLINE class UMaterialInstanceDynamic* GetDynamicMaterialInstance() const { return DynamicMaterialInstance; }
+	
+	FORCEINLINE int32 GetMaterialIndex() const { return MaterialIndex; }
+	FORCEINLINE void SetMaterialIndex(int32 x) { MaterialIndex = x; }
+	FORCEINLINE FLinearColor GetGlowColor() const { return GlowColor; }
 	
 
 	void SetItemState(EItemState State);

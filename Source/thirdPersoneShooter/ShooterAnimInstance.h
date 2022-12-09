@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "ShooterCharacter.h"
 #include "Animation/AnimInstance.h"
+#include "WeaponType.h"
 #include "ShooterAnimInstance.generated.h"
 
 /**
@@ -117,6 +118,14 @@ private:
 	// true when crouching
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Crouching, meta=(AllowPrivateAccess = "true"))
 	bool bEquipping;
+
+	// weapon type for the currently equipped weapon
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category=Combat, meta=(AllowPrivateAccess = "true"))
+	EWeaponType EquippedWeaponType;
+
+	// true when not reloading or equipping
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category=Combat, meta=(AllowPrivateAccess = "true"))
+	bool bShouldUseFABRIK;
 	
 
 public:

@@ -5,14 +5,14 @@
 
 AWeapon::AWeapon():
 
-ThrowWeaponTime(0.7f),
-bFalling(false),
-Ammo(30),
-MagazineCapacity(30),
-WeaponType(EWeaponType::EWT_SMG),
-AmmoType(EAmmoType::EAT_9MM),
-ReloadMontageSection(FName(TEXT("Reload SMG"))),
-ClipBoneName(FName(TEXT("smg_clip")))
+	ThrowWeaponTime(0.7f),
+	bFalling(false),
+	Ammo(30),
+	MagazineCapacity(30),
+	WeaponType(EWeaponType::EWT_SMG),
+	AmmoType(EAmmoType::EAT_9MM),
+	ReloadMontageSection(FName(TEXT("Reload SMG"))),
+	ClipBoneName(FName(TEXT("smg_clip")))
 
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -57,12 +57,77 @@ void AWeapon::StopFalling()
 	StartPulseTimer();
 }
 
+void AWeapon::OnConstruction(const FTransform& WeaponTransform)
+{
+	Super::OnConstruction(WeaponTransform);
+	const FString WeaponTablePath{TEXT("DataTable'/Game/_Game/DataTables/WeaponDataTable.WeaponDataTable'")};
+
+	UDataTable* WeaponTableObject = Cast<UDataTable>(
+		StaticLoadObject(UDataTable::StaticClass(), nullptr, *WeaponTablePath));
+
+	if (WeaponTableObject)
+	{
+		FWeaponDataTable* WeaponDataRow{nullptr};
+		switch (WeaponType)
+		{
+		case EWeaponType::EWT_SMG:
+			WeaponDataRow = WeaponTableObject->FindRow<FWeaponDataTable>(FName("SubMachineGun"), TEXT(""));
+			break;
+
+		case EWeaponType::EWT_AR:
+			WeaponDataRow = WeaponTableObject->FindRow<FWeaponDataTable>(FName("AssaultRifle"), TEXT(""));
+			break;
+			
+		default:
+			break;
+		}
+
+		if(WeaponDataRow)
+		{
+			AmmoType = WeaponDataRow->AmmoType;
+			Ammo = WeaponDataRow->WeaponAmmo;
+			MagazineCapacity = WeaponDataRow->MagazineCapacity;
+			SetPickupSound(WeaponDataRow->PickupSound);
+			SetEquipSound(WeaponDataRow->EquipSound);
+			GetItemMesh()->SetSkeletalMesh(WeaponDataRow->ItemMesh);
+			SetItemName(WeaponDataRow->ItemName);
+			SetAmmoIcon(WeaponDataRow->AmmoIcon);
+			SetIconItem(WeaponDataRow->InventoryIcon);
+
+			SetMaterialInstance(WeaponDataRow->MaterialInstance);
+			PreviousMaterialIndex = GetMaterialIndex();
+			GetItemMesh()->SetMaterial(PreviousMaterialIndex, nullptr);
+			SetMaterialIndex(WeaponDataRow->MaterialIndex);
+
+			SetClipBoneName(WeaponDataRow->ClipBoneName);
+			SetReloadMontageSection(WeaponDataRow->ReloadMontageSection);
+
+			GetItemMesh()->SetAnimInstanceClass(WeaponDataRow->AnimBP);
+		}
+
+		// update the material which glows on this weapon
+		if (GetMaterialInstance())
+		{
+			SetDynamicMaterialInstance(UMaterialInstanceDynamic::Create(GetMaterialInstance(), this));
+			GetDynamicMaterialInstance()->SetVectorParameterValue(TEXT("FresnelColor"), GetGlowColor());
+			GetItemMesh()->SetMaterial(GetMaterialIndex(), GetDynamicMaterialInstance());
+
+			EnableGlowMaterial();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("WeaponDataRow is empty"));
+		}
+	}
+}
+
 void AWeapon::DecrementAmmoCount()
 {
-	if(Ammo - 1 <= 0)
+	if (Ammo - 1 <= 0)
 	{
 		Ammo = 0;
-	} else
+	}
+	else
 	{
 		--Ammo;
 	}

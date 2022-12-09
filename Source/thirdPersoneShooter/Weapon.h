@@ -5,18 +5,64 @@
 #include "CoreMinimal.h"
 #include "Item.h"
 #include "AmmoType.h"
+#include "Engine/DataTable.h"
+#include "WeaponType.h"
 #include "Weapon.generated.h"
 
 /**
  * 
  */
 
-UENUM(BlueprintType)
-enum class EWeaponType: uint8
+USTRUCT()
+struct FWeaponDataTable: public FTableRowBase
 {
-	EWT_SMG UMETA(DisplayName = "Sub Machine Gun"),
-	EWT_AR UMETA(DisplayName = "Assault Rifle"),
-	EWT_MAX UMETA(DisplayName = "DefaultMax"),
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EAmmoType AmmoType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 WeaponAmmo;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 MagazineCapacity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USoundCue* PickupSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USoundCue* EquipSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USkeletalMesh* ItemMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UWidgetComponent* PickupWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString ItemName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UTexture2D* InventoryIcon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UTexture2D* AmmoIcon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UMaterialInstance* MaterialInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 MaterialIndex;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName ClipBoneName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName ReloadMontageSection;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UAnimInstance> AnimBP;
+
 };
 
 UCLASS()
@@ -30,6 +76,8 @@ public:
 
 protected:
 	void StopFalling();
+
+	virtual void OnConstruction(const FTransform& WeaponTransform) override;
 
 private:
 	FTimerHandle ThrowWeaponTimer;
@@ -59,6 +107,12 @@ private:
 	// name of gun reload clip bone
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=WeaponProperties, meta=(AllowPrivateAccess="true"))
 	FName ClipBoneName;
+
+	// data table for weapon properties
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=DataTable, meta=(AllowPrivateAccess="true"))
+	UDataTable* WeaponDataTable;
+
+	int32 PreviousMaterialIndex;
 	
 	
 public:
@@ -69,8 +123,13 @@ public:
 	FORCEINLINE int32 GetMagazineCapacity() const {return MagazineCapacity;};
 	FORCEINLINE EWeaponType GetWeaponType() const {return WeaponType;};
 	FORCEINLINE EAmmoType GetAmmoType() const {return AmmoType;};
+	
 	FORCEINLINE FName GetReloadMontageSection() const {return ReloadMontageSection;};
+	FORCEINLINE void SetReloadMontageSection(FName x) {ReloadMontageSection = x;};
+	
 	FORCEINLINE FName GetClipBoneName() const {return ClipBoneName;};
+	FORCEINLINE void SetClipBoneName(FName x) {ClipBoneName = x;};
+	
 	FORCEINLINE void SetMovingClip(bool Move){bMovingClip = Move;};
 
 	// called from character class when firing weapon
