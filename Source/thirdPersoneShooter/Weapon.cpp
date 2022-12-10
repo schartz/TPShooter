@@ -21,6 +21,16 @@ AWeapon::AWeapon():
 	PrimaryActorTick.bCanEverTick = true;
 }
 
+void AWeapon::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if(BoneToHide != FName(""))
+	{
+		GetItemMesh()->HideBoneByName(BoneToHide, EPhysBodyOp::PBO_None);
+	}
+}
+
 void AWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -80,6 +90,10 @@ void AWeapon::OnConstruction(const FTransform& WeaponTransform)
 		case EWeaponType::EWT_AR:
 			WeaponDataRow = WeaponTableObject->FindRow<FWeaponDataTable>(FName("AssaultRifle"), TEXT(""));
 			break;
+
+		case EWeaponType::EWT_PISTOL:
+			WeaponDataRow = WeaponTableObject->FindRow<FWeaponDataTable>(FName("Pistol"), TEXT(""));
+			break;
 			
 		default:
 			break;
@@ -116,6 +130,8 @@ void AWeapon::OnConstruction(const FTransform& WeaponTransform)
 			AutoFireRate = WeaponDataRow->AutoFireRate;
 			MuzzleFlash = WeaponDataRow->MuzzleFlash;
 			FireSound = WeaponDataRow->FireSound;
+			
+			BoneToHide = WeaponDataRow->BoneToHide;
 		}
 
 		// update the material which glows on this weapon
