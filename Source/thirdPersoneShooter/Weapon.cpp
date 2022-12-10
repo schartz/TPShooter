@@ -3,6 +3,9 @@
 
 #include "Weapon.h"
 
+// #include "Particles/ParticleSystem.h"
+// #include "Sound/SoundCue.h"
+
 AWeapon::AWeapon():
 
 	ThrowWeaponTime(0.7f),
@@ -103,6 +106,16 @@ void AWeapon::OnConstruction(const FTransform& WeaponTransform)
 			SetReloadMontageSection(WeaponDataRow->ReloadMontageSection);
 
 			GetItemMesh()->SetAnimInstanceClass(WeaponDataRow->AnimBP);
+
+			CrosshairsMiddle = WeaponDataRow->CrosshairsMiddle;
+			CrosshairsLeft = WeaponDataRow->CrosshairsLeft;
+			CrosshairsRight = WeaponDataRow->CrosshairsRight;
+			CrosshairsTop = WeaponDataRow->CrosshairsTop;
+			CrosshairsBottom = WeaponDataRow->CrosshairsBottom;
+
+			AutoFireRate = WeaponDataRow->AutoFireRate;
+			MuzzleFlash = WeaponDataRow->MuzzleFlash;
+			FireSound = WeaponDataRow->FireSound;
 		}
 
 		// update the material which glows on this weapon

@@ -229,10 +229,6 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera, meta=(AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
 
-	// flash on gun barrel upon fire
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Combat, meta=(AllowPrivateAccess = "true"))
-	class UParticleSystem* MuzzleFlash;
-
 	// particle effect on where bullets hit
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Combat, meta=(AllowPrivateAccess = "true"))
 	UParticleSystem* ImpactParticles;
@@ -240,10 +236,6 @@ private:
 	// particle effect on the path of bullets
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Combat, meta=(AllowPrivateAccess = "true"))
 	UParticleSystem* BeamParticles;
-
-	// randomized weapon fire sound cue
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Combat, meta=(AllowPrivateAccess = "true"))
-	class USoundCue* FireSound;
 
 	// montage for firing the weapon
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Combat, meta=(AllowPrivateAccess = "true"))
@@ -299,9 +291,6 @@ private:
 
 	// true when we can fire, false when waiting for the timer
 	bool bShouldFire;
-
-	// bullet fire rate from a Gun
-	float AutoFireRate;
 
 	// sets a timer between two timers
 	FTimerHandle AutoFireTimer;

@@ -62,7 +62,30 @@ struct FWeaponDataTable: public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UAnimInstance> AnimBP;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UTexture2D* CrosshairsMiddle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* CrosshairsRight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* CrosshairsLeft;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* CrosshairsBottom;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* CrosshairsTop;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AutoFireRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UParticleSystem* MuzzleFlash;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundCue* FireSound;
 };
 
 UCLASS()
@@ -113,6 +136,34 @@ private:
 	UDataTable* WeaponDataTable;
 
 	int32 PreviousMaterialIndex;
+
+	/** Textures for the weapon crosshairs*/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=DataTable, meta=(AllowPrivateAccess="true"))
+	UTexture2D* CrosshairsMiddle;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=DataTable, meta=(AllowPrivateAccess="true"))
+	UTexture2D* CrosshairsRight;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=DataTable, meta=(AllowPrivateAccess="true"))
+	UTexture2D* CrosshairsLeft;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=DataTable, meta=(AllowPrivateAccess="true"))
+	UTexture2D* CrosshairsBottom;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=DataTable, meta=(AllowPrivateAccess="true"))
+	UTexture2D* CrosshairsTop;
+
+	// the speed at which automatic fire happens
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=DataTable, meta=(AllowPrivateAccess="true"))
+	float AutoFireRate;
+
+	// particle system spawned at the barrel
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=DataTable, meta=(AllowPrivateAccess="true"))
+	UParticleSystem* MuzzleFlash;
+
+	// sound played when the weapon is fired
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=DataTable, meta=(AllowPrivateAccess="true"))
+	USoundCue* FireSound;
 	
 	
 public:
@@ -131,6 +182,10 @@ public:
 	FORCEINLINE void SetClipBoneName(FName x) {ClipBoneName = x;};
 	
 	FORCEINLINE void SetMovingClip(bool Move){bMovingClip = Move;};
+
+	FORCEINLINE float GetAutoFireRate() const {return AutoFireRate;};
+	FORCEINLINE UParticleSystem* GetMuzzleFlash() const {return MuzzleFlash;};
+	FORCEINLINE USoundCue* GetFireSound() const {return FireSound;};
 
 	// called from character class when firing weapon
 	void DecrementAmmoCount();

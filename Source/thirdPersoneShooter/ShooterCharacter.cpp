@@ -60,9 +60,6 @@ AShooterCharacter::AShooterCharacter() :
 	bFireButtonPressed(false),
 	bShouldFire(true),
 
-	// automatic gun fire rate
-	AutoFireRate(0.1f),
-
 	// item trace variables
 	bShouldTraceForItems(false),
 
@@ -378,9 +375,9 @@ void AShooterCharacter::FireWeapon()
 
 void AShooterCharacter::PlayFireSound() const
 {
-	if (FireSound)
+	if (EquippedWeapon->GetFireSound())
 	{
-		UGameplayStatics::PlaySound2D(this, FireSound);
+		UGameplayStatics::PlaySound2D(this, EquippedWeapon->GetFireSound());
 	}
 }
 
@@ -393,9 +390,13 @@ void AShooterCharacter::SendBullet() const
 		// position of the muzzle barrel of the gun
 		const FTransform socketTransform = BarrelSocket->GetSocketTransform(EquippedWeapon->GetItemMesh());
 
-		if (MuzzleFlash)
+		if (EquippedWeapon->GetMuzzleFlash())
 		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, socketTransform);
+			UGameplayStatics::SpawnEmitterAtLocation(
+				GetWorld(),
+				EquippedWeapon->GetMuzzleFlash(),
+				socketTransform
+			);
 		}
 
 		FVector BeamEndPoint;
@@ -577,9 +578,9 @@ void AShooterCharacter::TraceForItems()
 		{
 			TracedHitItem = Cast<AItem>(ItemTraceResult.GetActor());
 			const auto TracedHitWeapon = Cast<AWeapon>(TracedHitItem);
-			if(TracedHitWeapon)
+			if (TracedHitWeapon)
 			{
-				if(HighlightedSlot == -1)
+				if (HighlightedSlot == -1)
 				{
 					// not currently highlighting a slot. Highlight one
 					HighlightInventorySLot();
@@ -588,13 +589,13 @@ void AShooterCharacter::TraceForItems()
 			else
 			{
 				// is a lot being highlighted ?
-				if(HighlightedSlot != -1)
+				if (HighlightedSlot != -1)
 				{
 					// stop highlighting the slot
 					UnHighlightInventorySLot();
 				}
 			}
-			
+
 			// do not trace again for already interping item
 			if (TracedHitItem && TracedHitItem->GetItemState() == EItemState::EIS_EquipInterping)
 			{
@@ -606,7 +607,7 @@ void AShooterCharacter::TraceForItems()
 				// show item's pickup widget
 				TracedHitItem->GetPickupWidget()->SetVisibility(true);
 				TracedHitItem->EnableCustomDepth();
-				
+
 				if (Inventory.Num() >= INVENTORY_CAPACITY)
 				{
 					// inventory is full
@@ -755,8 +756,15 @@ void AShooterCharacter::FinishReloading()
 
 void AShooterCharacter::StartFireTimer()
 {
+	if (EquippedWeapon == nullptr) return;
+
 	CombatState = ECombatState::ECS_FIRE_TIMER_IN_PROGRESS;
-	GetWorldTimerManager().SetTimer(AutoFireTimer, this, &AShooterCharacter::AutoFireReset, AutoFireRate);
+	GetWorldTimerManager().SetTimer(
+		AutoFireTimer,
+		this,
+		&AShooterCharacter::AutoFireReset,
+		EquippedWeapon->GetAutoFireRate()
+	);
 }
 
 
