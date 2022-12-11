@@ -17,6 +17,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
+#include "SurfaceTypes.h"
 
 // Sets default values
 AShooterCharacter::AShooterCharacter() :
@@ -1331,4 +1333,31 @@ void AShooterCharacter::UnHighlightInventorySLot()
 {
 	HighlightIconDelegate.Broadcast(HighlightedSlot, false);
 	HighlightedSlot = -1;
+}
+
+EPhysicalSurface AShooterCharacter::GetFootStepsSurfaceType()
+{
+	FHitResult HitResult;
+	const FVector Start {GetActorLocation()};
+	const FVector End {Start + FVector(0.f, 0.f, -400.f)};
+	FCollisionQueryParams QueryParams;
+	QueryParams.bReturnPhysicalMaterial = true;
+	GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_Visibility, QueryParams);
+	
+	
+	/*if(HitResult.GetActor())
+	{
+		auto HitSurface {HitResult.PhysMaterial->SurfaceType};
+		if(HitSurface == EPS_Grass)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Hitted Grass"))
+			return EPS_Grass;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Boink!"))
+		}
+	}*/
+
+	return UPhysicalMaterial::DetermineSurfaceType(HitResult.PhysMaterial.Get());
 }

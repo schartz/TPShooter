@@ -161,6 +161,9 @@ protected:
 	int32 GetEmptyInventorySLot();
 	void HighlightInventorySLot();
 
+	UFUNCTION(BlueprintCallable)
+	EPhysicalSurface GetFootStepsSurfaceType();
+
 	
 
 public:	
