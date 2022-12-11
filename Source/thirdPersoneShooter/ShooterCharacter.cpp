@@ -370,6 +370,12 @@ void AShooterCharacter::FireWeapon()
 
 		// start time between shots
 		StartFireTimer();
+
+		if(EquippedWeapon->GetWeaponType() == EWeaponType::EWT_PISTOL)
+		{
+			// start moving slide timer
+			EquippedWeapon->StartSlideTimer();
+		}
 	}
 }
 

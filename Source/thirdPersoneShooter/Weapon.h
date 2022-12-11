@@ -105,6 +105,8 @@ protected:
 
 	virtual void OnConstruction(const FTransform& WeaponTransform) override;
 	virtual void BeginPlay() override;
+	void FinishMovingSlide();
+	void UpdateSlideDisplacement(float DeltaTime);
 
 private:
 	FTimerHandle ThrowWeaponTimer;
@@ -172,6 +174,37 @@ private:
 	// name of the bone to hide on the weapon mesh
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=DataTable, meta=(AllowPrivateAccess="true"))
 	FName BoneToHide;
+
+	// amount that the slide is pushed back during pistol fire
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Pistol, meta=(AllowPrivateAccess="true"))
+	float SlideDisplacement;
+
+	// curve for the slide displacement
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Pistol, meta=(AllowPrivateAccess="true"))
+	class UCurveFloat* SlideDisplacementCurve;
+
+	// timer handle for updating slide displacement
+	FTimerHandle SlideTimer;
+
+	// time for displacing the slide during pistol fire
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Pistol, meta=(AllowPrivateAccess="true"))
+	float SlideDisplacementTime;
+
+	// true when Pistol slide is moving
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Pistol, meta=(AllowPrivateAccess="true"))
+	bool bMovingSlide;
+
+	// max distance for the slide movement on pistol
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Pistol, meta=(AllowPrivateAccess="true"))
+	float MaxSlideDisplacement;
+
+	// max rotation for pistol rotate
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Pistol, meta=(AllowPrivateAccess="true"))
+	float MaxRecoilRotation;
+
+	// amount that the pistol will rotate during pistol fire
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Pistol, meta=(AllowPrivateAccess="true"))
+	float RecoilRotation;
 	
 	
 public:
@@ -194,6 +227,8 @@ public:
 	FORCEINLINE float GetAutoFireRate() const {return AutoFireRate;};
 	FORCEINLINE UParticleSystem* GetMuzzleFlash() const {return MuzzleFlash;};
 	FORCEINLINE USoundCue* GetFireSound() const {return FireSound;};
+
+	void StartSlideTimer();
 
 	// called from character class when firing weapon
 	void DecrementAmmoCount();

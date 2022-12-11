@@ -15,7 +15,12 @@ AWeapon::AWeapon():
 	WeaponType(EWeaponType::EWT_SMG),
 	AmmoType(EAmmoType::EAT_9MM),
 	ReloadMontageSection(FName(TEXT("Reload SMG"))),
-	ClipBoneName(FName(TEXT("smg_clip")))
+	ClipBoneName(FName(TEXT("smg_clip"))),
+	SlideDisplacement(0.f),
+	SlideDisplacementTime(0.2f),
+	bMovingSlide(false),
+	MaxSlideDisplacement(4.f),
+	MaxRecoilRotation(5.f)
 
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -25,7 +30,7 @@ void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if(BoneToHide != FName(""))
+	if (BoneToHide != FName(""))
 	{
 		GetItemMesh()->HideBoneByName(BoneToHide, EPhysBodyOp::PBO_None);
 	}
@@ -41,6 +46,9 @@ void AWeapon::Tick(float DeltaTime)
 	// 	const FRotator MeshRotation{0.f, GetItemMesh()->GetComponentRotation().Yaw, 0.f};
 	// 	GetItemMesh()->SetWorldRotation(MeshRotation, false, nullptr, ETeleportType::TeleportPhysics);
 	// }
+
+	// update slide on Pistol
+	UpdateSlideDisplacement(DeltaTime);
 }
 
 void AWeapon::ThrowWeapon()
@@ -94,12 +102,12 @@ void AWeapon::OnConstruction(const FTransform& WeaponTransform)
 		case EWeaponType::EWT_PISTOL:
 			WeaponDataRow = WeaponTableObject->FindRow<FWeaponDataTable>(FName("Pistol"), TEXT(""));
 			break;
-			
+
 		default:
 			break;
 		}
 
-		if(WeaponDataRow)
+		if (WeaponDataRow)
 		{
 			AmmoType = WeaponDataRow->AmmoType;
 			Ammo = WeaponDataRow->WeaponAmmo;
@@ -130,7 +138,7 @@ void AWeapon::OnConstruction(const FTransform& WeaponTransform)
 			AutoFireRate = WeaponDataRow->AutoFireRate;
 			MuzzleFlash = WeaponDataRow->MuzzleFlash;
 			FireSound = WeaponDataRow->FireSound;
-			
+
 			BoneToHide = WeaponDataRow->BoneToHide;
 		}
 
@@ -171,4 +179,32 @@ void AWeapon::ReloadAmmo(int32 Amount)
 bool AWeapon::ClipIsFull()
 {
 	return Ammo >= MagazineCapacity;
+}
+
+void AWeapon::StartSlideTimer()
+{
+	GetWorldTimerManager().SetTimer(
+		SlideTimer,
+		this,
+		&AWeapon::FinishMovingSlide,
+		SlideDisplacementTime);
+	bMovingSlide = true;
+}
+
+void AWeapon::FinishMovingSlide()
+{
+	bMovingSlide = false;
+}
+
+void AWeapon::UpdateSlideDisplacement(float DeltaTime)
+{
+	if (!bMovingSlide) return;
+	if (SlideDisplacementCurve)
+	{
+		const float ElapsedTime{GetWorldTimerManager().GetTimerElapsed(SlideTimer)};
+		const float CurveValue{SlideDisplacementCurve->GetFloatValue(ElapsedTime)};
+		SlideDisplacement = CurveValue * MaxSlideDisplacement;
+		RecoilRotation = CurveValue * MaxRecoilRotation;
+		UE_LOG(LogTemp, Warning, TEXT("RecoilRotation: %f"), RecoilRotation);
+	}
 }
