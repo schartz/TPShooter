@@ -20,7 +20,8 @@ AWeapon::AWeapon():
 	SlideDisplacementTime(0.2f),
 	bMovingSlide(false),
 	MaxSlideDisplacement(4.f),
-	MaxRecoilRotation(5.f)
+	MaxRecoilRotation(5.f),
+	bAutomatic(true)
 
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -140,6 +141,8 @@ void AWeapon::OnConstruction(const FTransform& WeaponTransform)
 			FireSound = WeaponDataRow->FireSound;
 
 			BoneToHide = WeaponDataRow->BoneToHide;
+			
+			bAutomatic = WeaponDataRow->bAutomatic;
 		}
 
 		// update the material which glows on this weapon
